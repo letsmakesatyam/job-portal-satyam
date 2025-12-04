@@ -1,8 +1,10 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import dotenv from "dotenv";
+import connectDB from "./utils/db.js";
 const app = express();
-
+dotenv.config();
 
 //middleware
 app.use(express.json());
@@ -16,7 +18,16 @@ app.use(cors(corsOptions));
 
 
 
-const PORT=5001;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+const PORT=process.env.PORT || 5001;
+const startServer = async () => {
+    try {
+        await connectDB();
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+    } catch (error) {
+        console.log(`Error connecting to MongoDB: ${error.message}`);
+        process.exit(1);
+    }
+};
+startServer();
