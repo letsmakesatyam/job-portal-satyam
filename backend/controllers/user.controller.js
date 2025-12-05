@@ -50,7 +50,7 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password , role } = req.body;
 
     // Check for missing fields
     if (!email || !password) {
@@ -93,7 +93,7 @@ export const login = async (req, res) => {
         .cookie("token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "Strict",
         maxAge: 24 * 60 * 60 * 1000, // 1 day
       })
       .status(200)
@@ -136,12 +136,7 @@ export const logout = (req, res) => {
 export const updateProfile = async (req, res) => {
     try {
         const { fullName, email, phoneNumber, bio, skills } = req.body;
-        if (!fullName || !email || !phoneNumber || !bio || !skills) {
-            return res.status(404).json({
-                message: "Missing required fields",
-                success: false,
-            });
-        }
+        
 
         const userId = req._id;
         const user = await User.findById(userId);
@@ -151,12 +146,24 @@ export const updateProfile = async (req, res) => {
                 success: false
             });
         }
+        if(fullName){
+            if (fullName) user.fullName = fullName;
+            
+        }
+        if(email){
+            user.email = email;
+        }
+        if(phoneNumber){
+            user.phoneNumber = phoneNumber;
+        }
+        if(bio){
+            user.profile.bio = bio;
+        }
+        if(skills){
+            user.profile.skills = skills.split(",");
+        }
 
-        user.fullName = fullName;
-        user.email = email;
-        user.phoneNumber = phoneNumber;
-        user.profile.bio = bio;
-        user.profile.skills = skills.split(",");
+       
 
         await user.save();
 
