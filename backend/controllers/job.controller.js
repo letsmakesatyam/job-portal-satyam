@@ -2,6 +2,7 @@ import { Job } from "../models/job.model.js";
 
 export const createJobPost = async (req, res) => {
     try {
+        
         const { 
             title, 
             description, 
@@ -25,7 +26,7 @@ export const createJobPost = async (req, res) => {
         const job = new Job({
             title,
             description,
-            requirements: requirements ? requirements.split(',').map(req => req.trim()) : [],
+            requirements,
             salary,
             location,
             jobType,
@@ -52,7 +53,7 @@ export const createJobPost = async (req, res) => {
     }
 };
 
-const getAllJobs = async (req, res) => {
+export const getAllJobs = async (req, res) => {
     try {
         const { keywords } = req.query;
         let filter = {};
@@ -117,7 +118,7 @@ export const getJobById = async (req, res) => {
 
 export const getAdminJobs = async (req, res) => {
     try {
-        const adminId = req.id; // assuming req.id contains the authenticated admin's user id
+        const adminId = req._id; // assuming req.id contains the authenticated admin's user id
 
         // Find jobs where created_by equals adminId
         const jobs = await Job.find({ created_by: adminId });
