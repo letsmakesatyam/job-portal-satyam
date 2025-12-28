@@ -1,12 +1,31 @@
 import express from "express";
-import { register , login , updateProfile, logout } from "../controllers/user.controller.js";
-import { isAuthenticated } from "../middleware/isAuthenticated.js";    
+import multer from "multer";
+import {
+  register,
+  login,
+  updateProfile,
+  logout,
+} from "../controllers/user.controller.js";
+import { isAuthenticated } from "../middleware/isAuthenticated.js";
+
 const router = express.Router();
 
-router.post("/register", register);
-router.post("/login", login);
-router.put("/update-profile", isAuthenticated ,updateProfile);
-router.post("/logout", logout);
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+});
 
+router.post(
+  "/register",
+  upload.fields([
+    { name: "profilePhoto", maxCount: 1 },
+    { name: "resume", maxCount: 1 },
+  ]),
+  register
+);
+
+router.post("/login", login);
+router.put("/update-profile", isAuthenticated, updateProfile);
+router.post("/logout", logout);
 
 export default router;

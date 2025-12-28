@@ -24,31 +24,35 @@ const userSchema = new mongoose.Schema({
         default: 'job-seeker',
         required: true,
       },
-    profile: {
-        bio:{
-            type: String,
+      profile: {
+        bio: {
+          type: String,
         },
-        skills:[
-            {
-                type: String,
-            }
+        skills: [
+          {
+            type: String,
+          }
         ],
-        resume:{
-            type: String,
+      
+        resume: {
+          data: Buffer,
+          contentType: String,
         },
-        resumeOriginalName:{
-            type: String,
+        resumeOriginalName: {
+          type: String,
         },
-        company:{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Company',
+      
+        company: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Company",
         },
-        profilePhoto:{
-            type: String,
-            default:""
+      
+        profilePhoto: {
+          data: Buffer,
+          contentType: String,
         },
-        
-    },
+      },
+      
     
 }, {timestamps:true});
 

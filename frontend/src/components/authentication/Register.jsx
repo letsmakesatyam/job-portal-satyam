@@ -21,32 +21,44 @@ const Register = () => {
     email: "",
     password: "",
     phoneNumber: "",
+    profilePhoto: null,
+    resume: null,
     role: "job-seeker",
   });
 
   const navigate = useNavigate();
 
   const handleChangeEvent = (e) => {
-    const { name, value } = e.target;
-    setInput((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, files } = e.target;
+    setInput((prev) => ({
+      ...prev,
+      [name]: type === "file" ? files[0] : value,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const formData = new FormData();
+    formData.append("fullName", input.fullName);
+    formData.append("email", input.email);
+    formData.append("password", input.password);
+    formData.append("phoneNumber", input.phoneNumber);
+    formData.append("role", input.role);
+    if (input.profilePhoto) {
+      formData.append("profilePhoto", input.profilePhoto);
+    }
+    if (input.role === "job-seeker" && input.resume) {
+      formData.append("resume", input.resume);
+    }
+
     try {
       const res = await axios.post(
         `${USER_API_ENDPOINT}/register`,
-        {
-          fullName: input.fullName,
-          email: input.email,
-          password: input.password,
-          phoneNumber: input.phoneNumber,
-          role: input.role,
-        },
+        formData,
         {
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "multipart/form-data",
           },
           withCredentials: true,
         }
@@ -120,6 +132,29 @@ const Register = () => {
                 onChange={handleChangeEvent}
               />
             </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="profile-photo">Profile Photo</Label>
+              <Input
+                id="profile-photo"
+                name="profilePhoto"
+                type="file"
+                onChange={handleChangeEvent}
+              />
+            </div>
+
+            {input.role === "job-seeker" && (
+              <div className="grid gap-2">
+                <Label htmlFor="resume">Resume (PDF only)</Label>
+                <Input
+                  id="resume"
+                  name="resume"
+                  type="file"
+                  accept=".pdf"
+                  onChange={handleChangeEvent}
+                />
+              </div>
+            )}
 
             <div className="grid gap-2">
               <Label>Register as</Label>
