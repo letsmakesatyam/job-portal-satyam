@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { LogOut, User2 } from "lucide-react"; // Import icons
+import { LogOut, User2, Zap } from "lucide-react"; 
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -10,65 +10,104 @@ import {
 } from "@/components/ui/popover";
 
 const Navbar = () => {
-  const user = false;
+  // In a real app, you'd get this from Redux (e.g., useSelector((state) => state.auth))
+  const user = false; 
+
   return (
-    <div className="bg-white border-b border-gray-200">
-      <div className="flex items-center justify-between mx-auto max-w-7xl h-16 px-4">
+    <nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-black/80 backdrop-blur-md">
+      <div className="flex items-center justify-between mx-auto max-w-7xl h-16 px-4 sm:px-6 lg:px-8">
+        
         {/* Logo Section */}
-        <div>
-          <h1 className="text-2xl font-bold">
-            Job <span className="text-[#F83002]">Portal</span>
+        <Link to="/" className="flex items-center gap-2 group">
+          <div className="bg-gradient-to-br from-violet-600 to-red-600 p-1.5 rounded-lg group-hover:scale-110 transition-transform">
+            <Zap className="w-5 h-5 text-white fill-white" />
+          </div>
+          <h1 className="text-2xl font-black tracking-tighter text-white">
+            JOB<span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-violet-500">PORTAL</span>
           </h1>
-        </div>
+        </Link>
 
         {/* Navigation & Profile */}
-        <div className="flex items-center gap-12">
-          <ul className="flex font-medium items-center gap-5 text-gray-600">
-            <Link to="/"><li className="hover:text-[#F83002] cursor-pointer transition-colors">Home</li></Link>
-            <li className="hover:text-[#F83002] cursor-pointer transition-colors">Browse</li>
-            <li className="hover:text-[#F83002] cursor-pointer transition-colors">Jobs</li>
+        <div className="flex items-center gap-8">
+          {/* Desktop Menu */}
+          <ul className="hidden md:flex font-medium items-center gap-8 text-gray-400">
+            <li>
+              <Link to="/" className="hover:text-red-500 transition-colors relative group">
+                Home
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-red-500 transition-all group-hover:w-full"></span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/browse" className="hover:text-violet-400 transition-colors relative group">
+                Browse
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-violet-400 transition-all group-hover:w-full"></span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/jobs" className="hover:text-violet-400 transition-colors relative group">
+                Jobs
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-violet-400 transition-all group-hover:w-full"></span>
+              </Link>
+            </li>
           </ul>
-           {!user?<div className="flex items-center gap-2">
-             <Link to="/login"><Button variant="ghost">Login</Button></Link>
-             <Link to="/register"><Button className="bg-[#F83002] text-white hover:bg-[#F83002]/90">Register</Button></Link>
-           </div> : <Popover>
-            <PopoverTrigger asChild>
-              <Avatar className="cursor-pointer border border-gray-200">
-                <AvatarImage src="https://github.com/shadcn.png" />
-                <AvatarFallback>CN</AvatarFallback>
-              </Avatar>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-4 shadow-lg mr-4">
-              <div className="flex gap-4 space-y-2">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src="https://github.com/shadcn.png" />
-                  <AvatarFallback>CN</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h4 className="font-semibold text-lg">Satyam Revgade</h4>
-                  <p className="text-sm text-muted-foreground leading-none">
-                    Software Developer
-                  </p>
-                </div>
-              </div>
-              
-              <div className="mt-4 flex flex-col gap-2 text-gray-600">
-                <div className="flex w-full items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-all">
-                  <User2 className="w-4 h-4" />
-                  <Button variant="link" className="p-0 h-auto font-normal focus-visible:ring-0 focus-visible:ring-offset-0">View Profile</Button>
-                </div>
-                <div className="flex w-full items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-all text-red-600">
-                  <LogOut className="w-4 h-4" />
-                  <Button variant="link" className="p-0 h-auto font-normal text-red-600">Logout</Button>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>}
 
-          
+          {/* Auth Section */}
+          <div className="flex items-center gap-4">
+            {!user ? (
+              <div className="flex items-center gap-3">
+                <Link to="/login">
+                  <Button variant="ghost" className="text-white hover:text-red-500 hover:bg-white/5">
+                    Login
+                  </Button>
+                </Link>
+                <Link to="/register">
+                  <Button className="bg-gradient-to-r from-red-600 to-violet-600 text-white hover:opacity-90 shadow-[0_0_15px_rgba(220,38,38,0.2)]">
+                    Register
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Avatar className="cursor-pointer border-2 border-violet-500/50 hover:border-red-500 transition-all">
+                    <AvatarImage src="https://github.com/shadcn.png" />
+                    <AvatarFallback className="bg-slate-800 text-white">SR</AvatarFallback>
+                  </Avatar>
+                </PopoverTrigger>
+                <PopoverContent className="w-72 mt-2 p-0 bg-zinc-900 border-white/10 shadow-2xl overflow-hidden">
+                  {/* Popover Header */}
+                  <div className="bg-gradient-to-r from-violet-900/50 to-red-900/50 p-4 border-b border-white/10">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10 border border-white/20">
+                        <AvatarImage src="https://github.com/shadcn.png" />
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-bold text-white leading-none">Satyam Revgade</p>
+                        <p className="text-xs text-gray-400 mt-1">Software Developer</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Popover Actions */}
+                  <div className="p-2 space-y-1">
+                    <Link to="/profile">
+                      <div className="flex items-center gap-3 px-3 py-2 rounded-md text-gray-300 hover:bg-white/5 hover:text-white transition-all cursor-pointer">
+                        <User2 className="w-4 h-4 text-violet-400" />
+                        <span className="text-sm font-medium">View Profile</span>
+                      </div>
+                    </Link>
+                    <div className="flex items-center gap-3 px-3 py-2 rounded-md text-red-400 hover:bg-red-500/10 transition-all cursor-pointer">
+                      <LogOut className="w-4 h-4" />
+                      <span className="text-sm font-medium">Logout</span>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </nav>
   );
 };
 
