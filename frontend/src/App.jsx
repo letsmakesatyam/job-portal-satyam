@@ -6,6 +6,8 @@ import Register from './components/authentication/Register'
 import Home from './components/components_lite/Home'
 import PrivacyPolicy from './components/components_lite/PrivacyPolicy'
 import TermsAndCondition from './components/components_lite/TermsAndCondition'
+import Jobs from './components/components_lite/Jobs'
+import Browse from './components/components_lite/Browse'
 const App = () => {
   return (
     <div>
@@ -16,6 +18,8 @@ const App = () => {
             <Route path="/" element={<Home/>}/>
             <Route path="/privacy" element={<PrivacyPolicy/>}/>
             <Route path="/terms" element={<TermsAndCondition/>}/>
+            <Route path="/jobs" element={<Jobs/>}/>
+            <Route path="/browse" element={<Browse/>}/>
         </Routes>
     </div>
   )
