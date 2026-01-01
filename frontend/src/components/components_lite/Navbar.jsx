@@ -8,10 +8,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useSelector } from "react-redux";
 
 const Navbar = () => {
   // In a real app, you'd get this from Redux (e.g., useSelector((state) => state.auth))
-  const user = false; 
+  const user = useSelector((state)=>state.auth.user);
+   
 
   return (
     // Using a solid black background

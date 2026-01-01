@@ -15,7 +15,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { USER_API_ENDPOINT } from "@/utils/data";
 import { useDispatch, useSelector } from "react-redux";
-import { setIsLoading } from "@/redux/authSlice";
+import { setIsLoading, setUser } from "@/redux/authSlice";
 import { Loader2, LockKeyhole, Mail } from "lucide-react";
 
 const Login = () => {
@@ -47,6 +47,7 @@ const Login = () => {
           withCredentials: true,
         }
       );
+      dispatch(setUser(res.data.user));
       toast.success(res.data.message || "Welcome back!");
       navigate("/");
     } catch (error) {
