@@ -14,7 +14,8 @@ const Navbar = () => {
   const user = false; 
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-black/80 backdrop-blur-md">
+    // Using a solid black background
+<nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#0a0a0a]">
       <div className="flex items-center justify-between mx-auto max-w-7xl h-16 px-4 sm:px-6 lg:px-8">
         
         {/* Logo Section */}
