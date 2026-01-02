@@ -208,3 +208,19 @@ export const getMyProfile = async (req, res) => {
     res.status(500).json({ message: "Server error", success: false });
   }
 };
+
+export const getResume = async (req, res) => {
+  const user = await User.findById(req._id).select("-password");
+
+  if (!user?.profile?.resume?.data) {
+    return res.status(404).json({ message: "Resume not found" });
+  }
+
+  res.set({
+    "Content-Type": user.profile.resume.contentType,
+    "Content-Disposition": `inline; filename="${user.profile.resumeOriginalName}"`
+  });
+
+  res.send(user.profile.resume.data);
+};
+

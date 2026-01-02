@@ -12,6 +12,7 @@ import axios from 'axios'
 import { USER_API_ENDPOINT } from './utils/data'
 import { useDispatch } from 'react-redux'
 import { setUser } from './redux/authSlice'
+import Profile from './components/components_lite/Profile'
 const App = () => {
   const dispatch = useDispatch();
   useEffect( ()=>{
@@ -34,6 +35,7 @@ const App = () => {
             <Route path="/terms" element={<TermsAndCondition/>}/>
             <Route path="/jobs" element={<Jobs/>}/>
             <Route path="/browse" element={<Browse/>}/>
+            <Route path="/profile" element={<Profile/>}/>
         </Routes>
     </div>
   )
