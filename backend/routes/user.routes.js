@@ -7,6 +7,7 @@ import {
   logout,
   getMyProfile,
   getResume,
+  getProfilePhoto,
 } from "../controllers/user.controller.js";
 import { isAuthenticated } from "../middleware/isAuthenticated.js";
 
@@ -27,10 +28,20 @@ router.post(
 );
 
 router.post("/login", login);
-router.put("/update-profile", isAuthenticated, updateProfile);
+router.put(
+  "/update-profile",
+  upload.fields([
+    {name: "profilePhoto", maxCount: 1},
+    {name: "resume", maxCount: 1},  
+  ]),
+  isAuthenticated,
+  updateProfile
+);
+
 router.post("/logout", logout);
 router.get("/me", isAuthenticated, getMyProfile);
 router.get("/users/:id/resume", isAuthenticated, getResume);
+router.get("/users/:id/photo" , getProfilePhoto )
 
 
 export default router;

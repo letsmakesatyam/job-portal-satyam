@@ -173,12 +173,30 @@ export const updateProfile = async (req, res) => {
         success: false,
       });
     }
+    const profilePhoto = req.files?.profilePhoto?.[0];
+    const resume = req.files?.resume?.[0];
 
     if (fullName) user.fullName = fullName;
     if (email) user.email = email;
     if (phoneNumber) user.phoneNumber = phoneNumber;
     if (bio) user.profile.bio = bio;
     if (skills) user.profile.skills = skills.split(",");
+
+    if (profilePhoto) {
+      user.profile.profilePhoto = {
+        data: profilePhoto.buffer,
+        contentType: profilePhoto.mimetype,
+      };
+    }
+
+    // 3. Update Resume (Buffer Logic)
+    if (resume) {
+      user.profile.resume = {
+        data: resume.buffer,
+        contentType: resume.mimetype,
+      };
+      user.profile.resumeOriginalName = resume.originalname;
+    }
 
     await user.save();
 
@@ -224,3 +242,17 @@ export const getResume = async (req, res) => {
   res.send(user.profile.resume.data);
 };
 
+export const getProfilePhoto = async (req, res) => {
+
+  const user = await User.findById(req.params.id).select("-password");
+  if (!user?.profile?.profilePhoto?.data) {
+    return res.status(404).json({ message: "Resume not found" });
+  }
+  res.set({
+    "Content-Type": user.profile.profilePhoto?.contentType,
+    
+  });
+
+  res.send(user.profile.profilePhoto.data);
+  
+}
