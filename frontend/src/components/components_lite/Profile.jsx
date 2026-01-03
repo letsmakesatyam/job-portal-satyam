@@ -15,10 +15,12 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { USER_API_ENDPOINT } from "@/utils/data";
-import axios from "axios";
 import { toast } from "sonner";
-import UpdateProfileDialog from "./UpdateProfileDialog"; // Import the dialog
+import { Worker, Viewer } from '@react-pdf-viewer/core';
+import '@react-pdf-viewer/core/lib/styles/index.css';
+import '@react-pdf-viewer/default-layout/lib/styles/index.css';
+
+import UpdateProfileDialog from "./UpdateProfileDialog"; 
 
 const appliedJobs = [
   { id: 1, role: "Frontend Developer", company: "Google", date: "20-08-2024", status: "Selected" },
@@ -29,30 +31,29 @@ const Profile = () => {
   const { user } = useSelector((state) => state.auth);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [open, setOpen] = useState(false); // State to control dialog
+  const [open, setOpen] = useState(false); 
+  // State to control photo pop-up
+  const [isPhotoPreviewOpen, setIsPhotoPreviewOpen] = useState(false);
 
   const initials = user?.fullName?.split(" ").map(n => n[0]).join("").toUpperCase() || "JP";
-  const resumeUrl = user?.profile?.resume ? `${USER_API_ENDPOINT}/users/${user._id}/resume` : null;
+  const resumeUrl = user?.profile?.resume?.data || null;
+  const profilePhotoUrl = user?.profile?.profilePhoto?.data || "";
 
   const downloadResume = async () => {
     if (!resumeUrl) return;
     try {
       setIsDownloading(true);
-      const response = await axios.get(resumeUrl, {
-        responseType: 'blob',
-        withCredentials: true
-      });
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
+      const response = await fetch(resumeUrl);
+      const blob = await response.blob();
       const link = document.createElement('a');
-      link.href = url;
+      link.href = window.URL.createObjectURL(blob);
       link.setAttribute('download', user?.profile?.resumeOriginalName || 'resume.pdf');
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
-      window.URL.revokeObjectURL(url);
       toast.success("Download started");
     } catch (error) {
+      console.error(error);
       toast.error("Failed to download resume");
     } finally {
       setIsDownloading(false);
@@ -69,20 +70,20 @@ const Profile = () => {
 
           <div className="flex flex-col md:flex-row justify-between items-start gap-6">
             <div className="flex items-center gap-6">
-            <Avatar className="h-24 w-24 border-4 border-violet-500/30 shadow-2xl shadow-violet-500/10">
-  {/* If user has a profilePhoto in the database, we hit the backend route.
-      The browser will treat this URL as an image source.
-  */}
-  <AvatarImage 
-    src={user?.profile?.profilePhoto ? `${USER_API_ENDPOINT}/users/${user._id}/photo` : ""} 
-    alt={user?.fullName}
-    className="object-cover"
-  />
-  {/* This only shows if AvatarImage fails to load or src is empty */}
-  <AvatarFallback className="bg-zinc-800 text-2xl font-bold text-white">
-    {initials}
-  </AvatarFallback>
-</Avatar>
+              {/* Added onClick and cursor styles to Avatar */}
+              <Avatar 
+                className="h-24 w-24 border-4 border-violet-500/30 shadow-2xl shadow-violet-500/10 cursor-pointer hover:scale-105 transition-transform"
+                onClick={() => setIsPhotoPreviewOpen(true)}
+              >
+                <AvatarImage 
+                  src={profilePhotoUrl} 
+                  alt={user?.fullName}
+                  className="object-cover"
+                />
+                <AvatarFallback className="bg-zinc-800 text-2xl font-bold text-white">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
               <div>
                 <h1 className="text-3xl font-black tracking-tight text-white">{user?.fullName || "Job Seeker"}</h1>
                 <p className="text-gray-400 font-medium mt-1">{user?.profile?.bio || "No bio added yet."}</p>
@@ -92,7 +93,6 @@ const Profile = () => {
                 </div>
               </div>
             </div>
-            {/* Click triggers setOpen(true) */}
             <Button onClick={() => setOpen(true)} variant="outline" className="border-white/10 bg-white/5 hover:bg-white/10 text-white gap-2">
               <PenBox className="w-4 h-4" /> Edit Profile
             </Button>
@@ -105,13 +105,13 @@ const Profile = () => {
                 user?.profile?.skills.map((item, index) => (
                   <Badge key={index} className="bg-violet-600/20 border-violet-500/30 text-violet-200 px-4 py-1">{item}</Badge>
                 ))
-              ) : ( <span className="text-gray-500 italic text-sm">No skills listed</span> )}
+              ) : ( <span className="text-gray-500 italic text-sm">No skills listed</span> )} 
             </div>
           </div>
 
           <div className="mt-6 flex flex-col gap-3">
             <Label className="text-sm font-bold uppercase tracking-widest text-gray-500">Resume</Label>
-            {user?.profile?.resume ? (
+            {resumeUrl ? (
               <div className="flex flex-wrap gap-3">
                 <Button onClick={() => setIsPreviewOpen(!isPreviewOpen)} variant="outline" className="bg-zinc-800 border-white/10 text-white gap-2 rounded-xl">
                   {isPreviewOpen ? <X className="w-4 h-4 text-red-500" /> : <Eye className="w-4 h-4 text-violet-400" />}
@@ -128,14 +128,20 @@ const Profile = () => {
           </div>
 
           {isPreviewOpen && resumeUrl && (
-            <div className="mt-6 animate-in fade-in zoom-in duration-300">
-              <div className="w-full h-[500px] border border-white/10 rounded-2xl overflow-hidden bg-white">
-                <iframe src={`${resumeUrl}#toolbar=0`} title="Resume" className="w-full h-full" />
+            <div className="mt-10 max-w-2xl mx-auto animate-in fade-in zoom-in duration-300">
+              <div className="w-full h-[600px] border border-white/10 rounded-2xl overflow-hidden bg-white">
+                <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
+                  <Viewer 
+                    fileUrl={resumeUrl} 
+                    withCredentials={false} 
+                  />
+                </Worker>
               </div>
             </div>
           )}
         </div>
 
+        {/* Applied Jobs Section */}
         <div className="mt-10">
           <div className="flex items-center gap-3 mb-6">
             <Briefcase className="w-6 h-6 text-red-500" />
@@ -159,7 +165,27 @@ const Profile = () => {
           </div>
         </div>
       </div>
-      {/* Dialog Component rendered at the bottom */}
+
+      {/* PHOTO PREVIEW MODAL */}
+      {isPhotoPreviewOpen && profilePhotoUrl && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 animate-in fade-in duration-300"
+          onClick={() => setIsPhotoPreviewOpen(false)}
+        >
+          <button 
+            className="absolute top-5 right-5 text-white hover:text-red-500 transition-colors"
+            onClick={() => setIsPhotoPreviewOpen(false)}
+          >
+            <X className="w-8 h-8" />
+          </button>
+          <img 
+            src={profilePhotoUrl} 
+            alt="Profile Full View" 
+            className="max-w-full max-h-[90vh] rounded-lg shadow-2xl animate-in zoom-in duration-300"
+          />
+        </div>
+      )}
+
       <UpdateProfileDialog open={open} setOpen={setOpen} />
     </div>
   );

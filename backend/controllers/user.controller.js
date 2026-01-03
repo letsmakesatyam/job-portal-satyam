@@ -266,3 +266,14 @@ export const getMyProfile = async (req, res) => {
   }
 };
 
+export const checkIsLoggedIn = async(req, res) => {
+  try {
+    const user = await User.findById(req._id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found", success: false });
+    }
+    res.status(200).json({ user, success: true });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", success: false });
+  }
+};
