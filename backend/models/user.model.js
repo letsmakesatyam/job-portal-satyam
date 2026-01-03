@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema({
         ],
       
         resume: {
-          data: Buffer,
+          data: String,
           contentType: String,
         },
         resumeOriginalName: {
@@ -48,7 +48,7 @@ const userSchema = new mongoose.Schema({
         },
       
         profilePhoto: {
-          data: Buffer,
+          data: String,
           contentType: String,
         },
       },

@@ -1,10 +1,25 @@
 import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import cloudinary from "../utils/cloudinary.js";
+
+
+
+const uploadToCloudinary = async (file, folder, resourceType = "image") => {
+  const result = await cloudinary.uploader.upload(
+    `data:${file.mimetype};base64,${file.buffer.toString("base64")}`,
+    {
+      folder,
+      resource_type: resourceType,
+    }
+  );
+  return result.secure_url;
+};
+
+
 
 export const register = async (req, res) => {
   try {
-    // ✅ defensive destructuring (critical fix)
     const {
       fullName = "",
       email = "",
@@ -13,26 +28,52 @@ export const register = async (req, res) => {
       role = "",
     } = req.body || {};
 
-    // ✅ file-safe (future-proof, no behavior change)
     const profilePhoto = req.files?.profilePhoto?.[0];
     const resume = req.files?.resume?.[0];
 
     if (!fullName || !email || !password || !phoneNumber || !role) {
-      return res
-        .status(400)
-        .json({ message: "All fields are required", success: false });
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ message: "Email already registered" });
     }
 
-    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user (unchanged behavior)
+    // ⬇️ Cloudinary uploads FIRST
+    let profilePhotoData;
+    let resumeData;
+    let resumeOriginalName;
+
+    if (profilePhoto) {
+      const photoUrl = await uploadToCloudinary(
+        profilePhoto,
+        "profile-photos"
+      );
+
+      profilePhotoData = {
+        data: photoUrl,
+        contentType: profilePhoto.mimetype,
+      };
+    }
+
+    if (role === "job-seeker" && resume) {
+      const resumeUrl = await uploadToCloudinary(
+        resume,
+        "resumes",
+        "raw"
+      );
+
+      resumeData = {
+        data: resumeUrl,
+        contentType: resume.mimetype,
+      };
+      resumeOriginalName = resume.originalname;
+    }
+
+    // ⬇️ Create user ONCE, with URLs
     const user = new User({
       fullName,
       email,
@@ -40,26 +81,11 @@ export const register = async (req, res) => {
       phoneNumber,
       role,
       profile: {
-        profilePhoto: profilePhoto
-          ? {
-              data: profilePhoto.buffer,
-              contentType: profilePhoto.mimetype,
-            }
-          : undefined,
-        resume:
-          role === "job-seeker" && resume
-            ? {
-                data: resume.buffer,
-                contentType: resume.mimetype,
-              }
-            : undefined,
-        resumeOriginalName: resume?.originalname,
+        profilePhoto: profilePhotoData,
+        resume: resumeData,
+        resumeOriginalName,
       },
     });
-    
-   
-    
-   
 
     await user.save();
 
@@ -77,6 +103,7 @@ export const register = async (req, res) => {
     });
   }
 };
+
 
 export const login = async (req, res) => {
   try {
@@ -164,35 +191,46 @@ export const updateProfile = async (req, res) => {
   try {
     const { fullName, email, phoneNumber, bio, skills } = req.body;
 
-    const userId = req._id;
-    const user = await User.findById(userId);
-
+    const user = await User.findById(req._id);
     if (!user) {
       return res.status(404).json({
         message: "User not found",
         success: false,
       });
     }
+
     const profilePhoto = req.files?.profilePhoto?.[0];
     const resume = req.files?.resume?.[0];
 
+    // Basic fields
     if (fullName) user.fullName = fullName;
     if (email) user.email = email;
     if (phoneNumber) user.phoneNumber = phoneNumber;
     if (bio) user.profile.bio = bio;
     if (skills) user.profile.skills = skills.split(",");
 
+    // ⬇️ Cloudinary instead of buffers
     if (profilePhoto) {
+      const photoUrl = await uploadToCloudinary(
+        profilePhoto,
+        "profile-photos"
+      );
+
       user.profile.profilePhoto = {
-        data: profilePhoto.buffer,
+        data: photoUrl,
         contentType: profilePhoto.mimetype,
       };
     }
 
-    // 3. Update Resume (Buffer Logic)
     if (resume) {
+      const resumeUrl = await uploadToCloudinary(
+        resume,
+        "resumes",
+        "raw"
+      );
+
       user.profile.resume = {
-        data: resume.buffer,
+        data: resumeUrl,
         contentType: resume.mimetype,
       };
       user.profile.resumeOriginalName = resume.originalname;
@@ -214,6 +252,7 @@ export const updateProfile = async (req, res) => {
   }
 };
 
+
 export const getMyProfile = async (req, res) => {
   try {
     const user = await User.findById(req._id).select("-password"); // Exclude password
@@ -227,32 +266,3 @@ export const getMyProfile = async (req, res) => {
   }
 };
 
-export const getResume = async (req, res) => {
-  const user = await User.findById(req._id).select("-password");
-
-  if (!user?.profile?.resume?.data) {
-    return res.status(404).json({ message: "Resume not found" });
-  }
-
-  res.set({
-    "Content-Type": user.profile.resume.contentType,
-    "Content-Disposition": `inline; filename="${user.profile.resumeOriginalName}"`
-  });
-
-  res.send(user.profile.resume.data);
-};
-
-export const getProfilePhoto = async (req, res) => {
-
-  const user = await User.findById(req.params.id).select("-password");
-  if (!user?.profile?.profilePhoto?.data) {
-    return res.status(404).json({ message: "Resume not found" });
-  }
-  res.set({
-    "Content-Type": user.profile.profilePhoto?.contentType,
-    
-  });
-
-  res.send(user.profile.profilePhoto.data);
-  
-}

@@ -5,9 +5,7 @@ import {
   login,
   updateProfile,
   logout,
-  getMyProfile,
-  getResume,
-  getProfilePhoto,
+
 } from "../controllers/user.controller.js";
 import { isAuthenticated } from "../middleware/isAuthenticated.js";
 
@@ -39,9 +37,8 @@ router.put(
 );
 
 router.post("/logout", logout);
-router.get("/me", isAuthenticated, getMyProfile);
-router.get("/users/:id/resume", isAuthenticated, getResume);
-router.get("/users/:id/photo" , getProfilePhoto )
+
+
 
 
 export default router;
