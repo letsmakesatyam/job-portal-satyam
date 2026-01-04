@@ -8,22 +8,13 @@ import PrivacyPolicy from './components/components_lite/PrivacyPolicy'
 import TermsAndCondition from './components/components_lite/TermsAndCondition'
 import Jobs from './components/components_lite/Jobs'
 import Browse from './components/components_lite/Browse'
-import axios from 'axios'
-import { USER_API_ENDPOINT } from './utils/data'
-import { useDispatch } from 'react-redux'
-import { setUser } from './redux/authSlice'
 import Profile from './components/components_lite/Profile'
+import checkUserLoggedIn from './hooks/checkUserLoggedIn'
+import useGetAllJobs from './hooks/useGetAllJobs'
 const App = () => {
-  const dispatch = useDispatch();
-  useEffect( ()=>{
-    const fetchUser = async ()=>{
-      const res = await axios.get(`${USER_API_ENDPOINT}/me`, {
-        withCredentials: true,
-      })
-      dispatch(setUser(res.data.user));
-    }
-    fetchUser();
-  },[])
+  checkUserLoggedIn();
+  useGetAllJobs();
+  
   return (
     <div>
         <Navbar/>
