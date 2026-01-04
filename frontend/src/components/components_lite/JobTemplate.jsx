@@ -5,6 +5,16 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { MapPin, Briefcase, DollarSign, Zap, Building2 } from "lucide-react";
 
 const JobTemplate = ({ job }) => {
+  // Helper to handle the "Posted" time logic
+  const daysAgoFunction = (mongodbTime) => {
+    const createdAt = new Date(mongodbTime);
+    const currentTime = new Date();
+    const timeDifference = currentTime - createdAt;
+    return Math.floor(timeDifference / (1000 * 24 * 60 * 60));
+  }
+
+  const days = daysAgoFunction(job?.createdAt);
+
   return (
     <Card className="bg-zinc-950 border-zinc-800 hover:border-violet-500/50 transition-all duration-300 group overflow-hidden flex flex-col">
       <CardHeader className="relative pb-2">
@@ -13,40 +23,43 @@ const JobTemplate = ({ job }) => {
             <Building2 className="w-6 h-6 text-violet-500" />
           </div>
           <Badge className="bg-red-500/10 text-red-500 border-red-500/20">
-            {job.type}
+            {job?.jobType}
           </Badge>
         </div>
         <div className="mt-4">
           <h3 className="text-xl font-bold text-zinc-100 group-hover:text-violet-400 transition-colors">
-            {job.role}
+            {job?.title}
           </h3>
-          <p className="text-zinc-400 font-medium text-sm mt-1">{job.company} • {job.industry}</p>
+          {/* FIX: Access job.company.name instead of just job.company */}
+          <p className="text-zinc-400 font-medium text-sm mt-1">
+            {job?.company?.name}
+          </p>
         </div>
       </CardHeader>
       
       <CardContent className="space-y-4 flex-grow">
         <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-xs text-zinc-400 font-medium">
           <div className="flex items-center gap-2">
-            <MapPin className="w-3.5 h-3.5 text-violet-500" /> {job.location}
+            <MapPin className="w-3.5 h-3.5 text-violet-500" /> {job?.location}
           </div>
           <div className="flex items-center gap-2">
-            <DollarSign className="w-3.5 h-3.5 text-violet-500" /> {job.salary}
+            <DollarSign className="w-3.5 h-3.5 text-violet-500" /> {job?.salary} LPA
           </div>
           <div className="flex items-center gap-2">
-            <Briefcase className="w-3.5 h-3.5 text-violet-500" /> {job.experience}
+            <Briefcase className="w-3.5 h-3.5 text-violet-500" /> {job?.experience} Yrs
           </div>
           <div className="flex items-center gap-2">
-            <Zap className="w-3.5 h-3.5 text-violet-500" /> {job.posted}
+            <Zap className="w-3.5 h-3.5 text-violet-500" /> 
+            {days === 0 ? "Today" : `${days} days ago`}
           </div>
         </div>
 
         <div className="space-y-2">
           <h4 className="text-xs font-bold uppercase text-zinc-500 tracking-widest">Description</h4>
           <p className="text-sm text-zinc-400 line-clamp-3 leading-relaxed">
-            {job.description}
+            {job?.description}
           </p>
         </div>
-        {/* Key Requirements section removed here */}
       </CardContent>
 
       <CardFooter className="pt-4 border-t border-zinc-900">

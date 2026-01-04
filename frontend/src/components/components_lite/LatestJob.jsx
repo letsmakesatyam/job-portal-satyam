@@ -1,9 +1,10 @@
 import React from 'react'
 import JobCard from './JobCard'
-
-const latestJobs = [1, 2, 3, 4, 5, 6]; // Placeholder data for UI
+import { useSelector } from 'react-redux';
 
 const LatestJob = () => {
+  const allJobs = useSelector((state) => state.job.allJobs);
+
   return (
     <section className="max-w-7xl mx-auto my-20 px-4">
       <div className="mb-10">
@@ -15,8 +16,8 @@ const LatestJob = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {
-          latestJobs.map((item, index) => (
-            <JobCard key={index} />
+          allJobs?.slice(0, 6).map((job) => (
+            <JobCard key={job._id} job={job} />
           ))
         }
       </div>
@@ -24,4 +25,4 @@ const LatestJob = () => {
   )
 }
 
-export default LatestJob
+export default LatestJob;
