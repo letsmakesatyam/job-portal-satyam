@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { JOB_API_ENDPOINT, APPLICATION_API_ENDPOINT } from '@/utils/data';
 import { ArrowLeft, MapPin, Briefcase, IndianRupee, Users, Calendar, Sparkles } from 'lucide-react';
-import { toast } from 'sonner'; // Assuming you use Sonner for better alerts
+import { toast } from 'sonner';
 
 const JobDescription = () => {
     const { id } = useParams();
@@ -13,9 +13,10 @@ const JobDescription = () => {
     const [job, setJob] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Mock User ID - Replace with your actual auth state (e.g., useSelector)
+    // IMPORTANT: Ensure this ID matches the one in your database for the logged-in user
+    // Ideally, get this from your Redux store or Auth Context
     const user = { _id: "current_user_id" }; 
-    const isApplied = job?.applications?.some(app => app.applicant === user?._id) || false;
+    const isApplied = job?.applications?.some(app => app.applicant === user?._id || app === user?._id) || false;
 
     useEffect(() => {
         const fetchJobDetail = async () => {
@@ -37,19 +38,19 @@ const JobDescription = () => {
 
     const applyJobHandler = async () => {
         try {
-            // Change .get to .post
-            // Send { jobId: id } as the data object
             const res = await axios.post(`${APPLICATION_API_ENDPOINT}/apply`, 
                 { jobId: id }, 
                 { withCredentials: true }
             );
     
-            if (res.data.success) {
+            // Check for status 201 or res.data.success
+            if (res.status === 201 || res.data.success) {
                 toast.success(res.data.message || "Applied successfully!");
-                // Update local state so button disables immediately
+                
+                // Update local state to increment applicant count and disable button
                 setJob(prev => ({ 
                     ...prev, 
-                    applications: [...prev.applications, { applicant: user._id }] 
+                    applications: [...(prev.applications || []), { applicant: user._id }] 
                 }));
             }
         } catch (error) {
@@ -67,14 +68,12 @@ const JobDescription = () => {
 
     return (
         <div className="min-h-screen bg-black text-white pb-20">
-            {/* Background Glows */}
             <div className="fixed top-0 left-0 w-full h-full pointer-events-none -z-0">
                 <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-violet-600/10 blur-[120px]" />
                 <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-red-600/10 blur-[120px]" />
             </div>
 
             <div className="max-w-5xl mx-auto px-4 pt-10 relative z-10">
-                {/* Header Navigation */}
                 <Button 
                     variant="ghost" 
                     onClick={() => navigate(-1)}
@@ -83,7 +82,6 @@ const JobDescription = () => {
                     <ArrowLeft className="mr-2 h-4 w-4" /> Back to Jobs
                 </Button>
 
-                {/* Job Hero Section */}
                 <div className="bg-zinc-900/40 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-8 md:p-12 shadow-2xl">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div className="space-y-4">
@@ -104,10 +102,10 @@ const JobDescription = () => {
                         <Button 
                             disabled={isApplied}
                             onClick={applyJobHandler}
-                            className={`h-16 px-10 text-lg font-bold rounded-2xl transition-all duration-300 shadow-lg shadow-violet-600/20
+                            className={`h-16 px-10 text-lg font-bold rounded-2xl transition-all duration-300 shadow-lg 
                                 ${isApplied 
-                                    ? 'bg-zinc-800 text-gray-500 cursor-not-allowed border border-white/10' 
-                                    : 'bg-gradient-to-r from-red-600 to-violet-600 hover:opacity-90 active:scale-95'
+                                    ? 'bg-zinc-800 text-gray-500 cursor-not-allowed border border-white/10 shadow-none' 
+                                    : 'bg-gradient-to-r from-red-600 to-violet-600 hover:scale-105 hover:brightness-110 active:scale-95 shadow-violet-600/20'
                                 }`}
                         >
                             {isApplied ? 'Already Applied' : 'Apply Now'}
@@ -125,7 +123,7 @@ const JobDescription = () => {
                         </div>
                         <div className="flex items-center gap-3 text-gray-400">
                             <div className="p-2 bg-white/5 rounded-lg"><Users size={18} className="text-red-500"/></div>
-                            <div><p className="text-xs">Applicants</p><p className="text-white font-medium">{job.applications?.length}</p></div>
+                            <div><p className="text-xs">Applicants</p><p className="text-white font-medium">{job.applications?.length || 0}</p></div>
                         </div>
                         <div className="flex items-center gap-3 text-gray-400">
                             <div className="p-2 bg-white/5 rounded-lg"><Calendar size={18} className="text-violet-500"/></div>
@@ -134,7 +132,6 @@ const JobDescription = () => {
                     </div>
                 </div>
 
-                {/* Details Section */}
                 <div className="mt-12 space-y-8 px-4">
                     <section>
                         <h2 className="text-2xl font-bold flex items-center gap-2">

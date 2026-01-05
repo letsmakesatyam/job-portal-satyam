@@ -1,19 +1,21 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom'; // 1. Import useNavigate
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { MapPin, Briefcase, DollarSign, Zap, Building2 } from "lucide-react";
 
 const JobTemplate = ({ job }) => {
-  // Helper to handle the "Posted" time logic
+  const navigate = useNavigate(); // 2. Initialize navigate
+
   const daysAgoFunction = (mongodbTime) => {
     const createdAt = new Date(mongodbTime);
     const currentTime = new Date();
     const timeDifference = currentTime - createdAt;
     return Math.floor(timeDifference / (1000 * 24 * 60 * 60));
   }
+
   const formatSalaryLPA = (salary) => {
-    
     const value = Number(salary);
     if (!value || isNaN(value)) return "—";
     return `${(value / 100000).toFixed(1)} LPA`;
@@ -36,7 +38,6 @@ const JobTemplate = ({ job }) => {
           <h3 className="text-xl font-bold text-zinc-100 group-hover:text-violet-400 transition-colors">
             {job?.title}
           </h3>
-          {/* FIX: Access job.company.name instead of just job.company */}
           <p className="text-zinc-400 font-medium text-sm mt-1">
             {job?.company?.name}
           </p>
@@ -69,12 +70,16 @@ const JobTemplate = ({ job }) => {
       </CardContent>
 
       <CardFooter className="pt-4 border-t border-zinc-900">
-        <Button className="w-full bg-violet-600 text-white hover:bg-violet-700 transition-all font-bold shadow-[0_0_20px_rgba(139,92,246,0.15)]">
+        {/* 3. Add onClick handler to navigate to the description page */}
+        <Button 
+          onClick={() => navigate(`/description/${job?._id}`)}
+          className="w-full bg-violet-600 text-white hover:bg-violet-700 transition-all font-bold shadow-[0_0_20px_rgba(139,92,246,0.15)]"
+        >
           View Full Details
         </Button>
       </CardFooter>
     </Card>
   );
-};
+}; 
 
 export default JobTemplate;
