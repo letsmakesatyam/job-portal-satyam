@@ -1,10 +1,18 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom'; // 1. Import useNavigate
 import { Search, MapPin, Sparkles } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
 const Header = () => {
+  const navigate = useNavigate(); // 2. Initialize the navigate function
+
+  const handleSearch = () => {
+    // 3. Define the navigation logic
+    navigate('/browse');
+  };
+
   return (
     <header className="relative bg-black pt-16 pb-32 lg:pt-24 lg:pb-48 overflow-hidden">
       {/* Background Glows */}
@@ -37,7 +45,11 @@ const Header = () => {
               <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 group-focus-within:text-red-500" />
               <Input placeholder="Location..." className="h-14 pl-12 bg-transparent border-none text-white focus-visible:ring-0" />
             </div>
-            <Button className="w-full md:w-auto h-14 px-10 bg-gradient-to-r from-red-600 to-violet-600 hover:opacity-90 font-bold">
+            {/* 4. Add onClick handler to the Button */}
+            <Button 
+              onClick={handleSearch}
+              className="w-full md:w-auto h-14 px-10 bg-gradient-to-r from-red-600 to-violet-600 hover:opacity-90 font-bold"
+            >
               Search Jobs
             </Button>
           </div>
