@@ -11,6 +11,7 @@ import Browse from './components/components_lite/Browse'
 import Profile from './components/components_lite/Profile'
 import checkUserLoggedIn from './hooks/checkUserLoggedIn'
 import useGetAllJobs from './hooks/useGetAllJobs'
+import JobDescription from './components/components_lite/JobDescription'
 const App = () => {
   checkUserLoggedIn();
   useGetAllJobs();
@@ -27,6 +28,7 @@ const App = () => {
             <Route path="/jobs" element={<Jobs/>}/>
             <Route path="/browse" element={<Browse/>}/>
             <Route path="/profile" element={<Profile/>}/>
+            <Route path="/description/:id" element={<JobDescription />} />
         </Routes>
     </div>
   )

@@ -3,10 +3,10 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Bookmark, MapPin, DollarSign, BriefcaseBusiness } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-
+import { useNavigate } from 'react-router-dom'
 const JobCard = ({ job }) => {
   // Helper function to calculate days ago
-  
+  const navigate = useNavigate();
   const daysAgoFunction = (mongodbTime) => {
     const createdAt = new Date(mongodbTime);
     const currentTime = new Date();
@@ -70,7 +70,7 @@ const JobCard = ({ job }) => {
         </Badge>
       </div>
 
-      <Button className="w-full mt-6 bg-zinc-900 border border-white/10 text-white hover:bg-gradient-to-r hover:from-red-600 hover:to-violet-600 hover:border-transparent transition-all duration-500 py-6 rounded-2xl font-bold">
+      <Button onClick={() => navigate(`/description/${job._id}`)} className="w-full mt-6 bg-zinc-900 border border-white/10 text-white hover:bg-gradient-to-r hover:from-red-600 hover:to-violet-600 hover:border-transparent transition-all duration-500 py-6 rounded-2xl font-bold">
         Details
       </Button>
     </div>
