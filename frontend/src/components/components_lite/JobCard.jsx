@@ -6,12 +6,22 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 const JobCard = ({ job }) => {
   // Helper function to calculate days ago
+  
   const daysAgoFunction = (mongodbTime) => {
     const createdAt = new Date(mongodbTime);
     const currentTime = new Date();
     const timeDifference = currentTime - createdAt;
     return Math.floor(timeDifference / (1000 * 24 * 60 * 60));
   }
+  const formatSalaryLPA = (salary) => {
+    const value = Number(salary);
+    
+    if (!value || isNaN(value)) return "—";
+    return `${(value / 100000).toFixed(1)} LPA`;
+  };
+  
+  
+  
 
   return (
     /* Glassmorphism effect: bg-white/5 and backdrop-blur */
@@ -56,7 +66,7 @@ const JobCard = ({ job }) => {
           <BriefcaseBusiness className="w-3 h-3 mr-1" /> {job?.jobType}
         </Badge>
         <Badge className="bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20 transition-colors">
-          <DollarSign className="w-3 h-3 mr-1" /> {job?.salary} LPA
+          <DollarSign className="w-3 h-3 mr-1" /> {formatSalaryLPA(job?.salary)}
         </Badge>
       </div>
 

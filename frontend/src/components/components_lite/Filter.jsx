@@ -20,7 +20,7 @@ const filterData = [
   {
     id: "salary",
     name: "Salary Range",
-    options: ["0-40k", "42k-1lakh", "1lakh-5lakh", "5lakh-10lakh"],
+    options: ["0-4LPA", "5-12LPA", "13-24LPA", ">24LPA"],
   },
 ];
 

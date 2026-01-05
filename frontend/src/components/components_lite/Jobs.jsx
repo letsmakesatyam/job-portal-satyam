@@ -9,25 +9,37 @@ const Jobs = () => {
 
   useEffect(() => {
     if (searchedQuery) {
-      // Split the combined query into individual domain values
       const [loc, ind, sal] = searchedQuery.split(",");
-
+  
       const filteredJobs = allJobs.filter((job) => {
-        // Condition checks: If a filter isn't selected, it defaults to 'true'
+        // 1. Location Filter
         const matchesLocation = loc ? job?.location?.toLowerCase() === loc.toLowerCase() : true;
         
-        // Check industry against job title or description
+        // 2. Industry/Title Filter
         const matchesIndustry = ind ? (
           job?.title?.toLowerCase().includes(ind.toLowerCase()) || 
           job?.description?.toLowerCase().includes(ind.toLowerCase())
         ) : true;
-
-        const matchesSalary = sal ? job?.salary?.toString().toLowerCase().includes(sal.toLowerCase()) : true;
-
-        // "AND" Logic: All conditions must be true
+  
+        // 3. Corrected Salary Logic
+        let matchesSalary = true;
+        if (sal) {
+          const salaryNum = job?.salary; // Example: 900000
+          
+          if (sal === "0-4LPA") {
+            matchesSalary = salaryNum <= 400000;
+          } else if (sal === "5-12LPA") {
+            matchesSalary = salaryNum >= 500000 && salaryNum <= 1200000;
+          } else if (sal === "13-24LPA") {
+            matchesSalary = salaryNum >= 1300000 && salaryNum <= 2400000;
+          } else if (sal === ">24LPA") {
+            matchesSalary = salaryNum > 2400000;
+          }
+        }
+  
         return matchesLocation && matchesIndustry && matchesSalary;
       });
-
+  
       setFilterJobs(filteredJobs);
     } else {
       setFilterJobs(allJobs);

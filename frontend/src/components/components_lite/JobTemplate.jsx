@@ -12,6 +12,12 @@ const JobTemplate = ({ job }) => {
     const timeDifference = currentTime - createdAt;
     return Math.floor(timeDifference / (1000 * 24 * 60 * 60));
   }
+  const formatSalaryLPA = (salary) => {
+    
+    const value = Number(salary);
+    if (!value || isNaN(value)) return "—";
+    return `${(value / 100000).toFixed(1)} LPA`;
+  };
 
   const days = daysAgoFunction(job?.createdAt);
 
@@ -43,7 +49,7 @@ const JobTemplate = ({ job }) => {
             <MapPin className="w-3.5 h-3.5 text-violet-500" /> {job?.location}
           </div>
           <div className="flex items-center gap-2">
-            <DollarSign className="w-3.5 h-3.5 text-violet-500" /> {job?.salary} LPA
+            <DollarSign className="w-3.5 h-3.5 text-violet-500" /> {formatSalaryLPA(job?.salary)} 
           </div>
           <div className="flex items-center gap-2">
             <Briefcase className="w-3.5 h-3.5 text-violet-500" /> {job?.experience} Yrs
