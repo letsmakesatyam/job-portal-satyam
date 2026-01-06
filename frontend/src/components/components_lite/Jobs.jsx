@@ -10,21 +10,27 @@ const Jobs = () => {
   useEffect(() => {
     if (searchedQuery) {
       const [loc, ind, sal] = searchedQuery.split(",");
-  
+
       const filteredJobs = allJobs.filter((job) => {
-        // 1. Location Filter
-        const matchesLocation = loc ? job?.location?.toLowerCase() === loc.toLowerCase() : true;
+        // Normalize helper to ignore spaces and case
+        const normalize = (str) => str?.toString().toLowerCase().replace(/\s+/g, '') || "";
+
+        // 1. Location Filter (Partial match + ignores spaces)
+        const matchesLocation = loc 
+          ? normalize(job?.location).includes(normalize(loc)) 
+          : true;
         
-        // 2. Industry/Title Filter
-        const matchesIndustry = ind ? (
-          job?.title?.toLowerCase().includes(ind.toLowerCase()) || 
-          job?.description?.toLowerCase().includes(ind.toLowerCase())
-        ) : true;
+        // 2. Industry/Title Filter (Partial match + ignores spaces)
+        const matchesIndustry = ind 
+          ? (
+            normalize(job?.title).includes(normalize(ind)) || 
+            normalize(job?.description).includes(normalize(ind))
+          ) : true;
   
-        // 3. Corrected Salary Logic
+        // 3. Salary Logic (Kept as requested since it's working)
         let matchesSalary = true;
         if (sal) {
-          const salaryNum = job?.salary; // Example: 900000
+          const salaryNum = job?.salary; 
           
           if (sal === "0-4LPA") {
             matchesSalary = salaryNum <= 400000;
@@ -45,7 +51,6 @@ const Jobs = () => {
       setFilterJobs(allJobs);
     }
   }, [allJobs, searchedQuery]);
-
   return (
     <div className="min-h-screen bg-black text-white selection:bg-violet-500/30">
       <div className="max-w-[1400px] mx-auto px-6 py-12">

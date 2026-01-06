@@ -8,7 +8,10 @@ import {
   Download,
   Eye,
   X,
-  Loader2
+  Loader2,
+  Calendar,
+  Building2,
+  MapPin
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -53,7 +56,8 @@ const Profile = () => {
         if (!res.ok) throw new Error("Failed to fetch applied jobs");
 
         const data = await res.json();
-        setAppliedJobs(data.jobs || []);
+        console.log(data);
+        setAppliedJobs(data.applications || []);
       } catch (error) {
         console.error(error);
         toast.error("Unable to load applied jobs");
@@ -206,55 +210,91 @@ const Profile = () => {
           )}
         </div>
 
-        {/* APPLIED JOBS */}
-        <div className="mt-10">
-          <div className="flex items-center gap-3 mb-6">
-            <Briefcase className="w-6 h-6 text-red-500" />
-            <h2 className="text-2xl font-bold">Applied Jobs</h2>
-          </div>
+        {/* APPLIED JOBS SECTION */}
+       {/* APPLIED JOBS SECTION */}
+<div className="mt-12">
+  <div className="flex items-center justify-between mb-8">
+    <div className="flex items-center gap-3">
+      <div className="p-2 bg-red-500/10 rounded-lg">
+        <Briefcase className="w-6 h-6 text-red-500" />
+      </div>
+      <div>
+        <h2 className="text-2xl font-bold text-white">Applied Jobs</h2>
+        <p className="text-sm text-gray-500">Track your application progress</p>
+      </div>
+    </div>
+    <Badge variant="outline" className="border-white/10 text-gray-400 px-3 py-1">
+      {appliedJobs.length} Applications
+    </Badge>
+  </div>
 
-          {jobsLoading ? (
-            <div className="text-gray-400 italic">Loading applied jobs...</div>
-          ) : appliedJobs.length === 0 ? (
-            <div className="text-gray-500 italic">No jobs applied yet</div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {appliedJobs.map((job) => (
-                <Card
-                  key={job._id}
-                  className="bg-zinc-900 border-white/5 hover:border-red-500/50 transition-all"
-                >
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-lg font-bold">
-                      {job.job?.title}
-                    </CardTitle>
-                    <Badge
-                      className={
-                        job.status === "Selected"
-                          ? "bg-green-500/20 text-green-400"
-                          : job.status === "Rejected"
-                          ? "bg-red-500/20 text-red-400"
-                          : "bg-yellow-500/20 text-yellow-400"
-                      }
-                    >
-                      {job.status}
-                    </Badge>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex justify-between items-center text-sm text-gray-400">
-                      <span className="text-gray-300">
-                        {job.job?.company?.name}
-                      </span>
-                      <span>
-                        {new Date(job.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+  {jobsLoading ? (
+    <div className="flex items-center justify-center py-20">
+       <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+    </div>
+  ) : appliedJobs.length === 0 ? (
+    <div className="text-center py-20 border border-dashed border-white/10 rounded-3xl bg-zinc-900/20">
+      <p className="text-gray-500 italic">No jobs applied yet. Start your journey today!</p>
+    </div>
+  ) : (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      {appliedJobs.map((job) => (
+        <Card
+          key={job._id}
+          className="group bg-zinc-900/40 border-white/5 hover:border-violet-500/40 transition-all duration-300 hover:shadow-2xl hover:shadow-violet-500/5 overflow-hidden"
+        >
+          <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3">
+            <div className="space-y-1.5">
+              {/* UPDATED JOB TITLE: Larger, bolder, and pure white */}
+              <CardTitle className="text-xl font-extrabold text-white tracking-tight group-hover:text-violet-400 transition-colors duration-300">
+                {job.job?.title}
+              </CardTitle>
+              <div className="flex items-center gap-2 text-zinc-400 text-sm font-medium">
+                 <Building2 className="w-4 h-4 text-violet-500/70" />
+                 <span>{job.job?.company?.name}</span>
+              </div>
             </div>
-          )}
-        </div>
+            <Badge
+              className={
+                job.status === "Selected"
+                  ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                  : job.status === "Rejected"
+                  ? "bg-red-500/10 text-red-500 border-red-500/20"
+                  : "bg-amber-500/10 text-amber-500 border-amber-500/20"
+              }
+            >
+              {job.status || "Pending"}
+            </Badge>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-4 text-[11px] text-zinc-500 uppercase tracking-widest font-bold">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5" />
+                  {new Date(job.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5" />
+                  {job.job?.location || "Remote"}
+                </div>
+              </div>
+              
+              {/* Visual Progress Line */}
+              <div className="relative w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                 <div 
+                   className={`h-full transition-all duration-700 ease-out ${
+                     job.status === "Selected" ? "w-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : 
+                     job.status === "Rejected" ? "w-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" : "w-1/3 bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
+                   }`} 
+                 />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )}
+</div>
       </div>
 
       {/* PHOTO PREVIEW */}
