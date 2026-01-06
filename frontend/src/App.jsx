@@ -12,6 +12,9 @@ import Profile from './components/components_lite/Profile'
 import checkUserLoggedIn from './hooks/checkUserLoggedIn'
 import useGetAllJobs from './hooks/useGetAllJobs'
 import JobDescription from './components/components_lite/JobDescription'
+import Company from "./components/components_lite/Company"
+import CreateCompany from './components/components_lite/CreateCompany'
+import CompanySetup from './components/components_lite/CompanySetup'
 const App = () => {
   checkUserLoggedIn();
   useGetAllJobs();
@@ -29,6 +32,10 @@ const App = () => {
             <Route path="/browse" element={<Browse/>}/>
             <Route path="/profile" element={<Profile/>}/>
             <Route path="/description/:id" element={<JobDescription />} />
+            <Route path="/admin/companies" element={<Company/>}/>
+            <Route path="/admin/companies/create" element={<CreateCompany/>}/>
+            <Route path="/admin/companies/:id" element={<CompanySetup />} />
+
         </Routes>
     </div>
   )

@@ -27,6 +27,11 @@ const Navbar = () => {
     .join("")
     .toUpperCase() || "U";
 
+  // Ensure we are getting the correct string path for the photo
+  // Check if your backend sends it as user.profile.profilePhoto or user.profilePhoto
+  const profilePic = user?.profile?.profilePhoto.data;
+  console.log(profilePic)
+
   const handleLogout = async () => {
     try {
       await axios.post(
@@ -61,24 +66,43 @@ const Navbar = () => {
         {/* Navigation & Profile */}
         <div className="flex items-center gap-8">
           <ul className="hidden md:flex font-medium items-center gap-8 text-gray-400">
-            <li>
-              <Link to="/" className="hover:text-red-500 transition-colors relative group">
-                Home
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-red-500 transition-all group-hover:w-full"></span>
-              </Link>
-            </li>
-            <li>
-              <Link to="/browse" className="hover:text-violet-400 transition-colors relative group">
-                Browse
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-violet-400 transition-all group-hover:w-full"></span>
-              </Link>
-            </li>
-            <li>
-              <Link to="/jobs" className="hover:text-violet-400 transition-colors relative group">
-                Jobs
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-violet-400 transition-all group-hover:w-full"></span>
-              </Link>
-            </li>
+            {user && user.role === "employer" ? (
+              <>
+                <li>
+                  <Link to="/admin/companies" className="hover:text-red-500 transition-colors relative group">
+                    Companies
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-red-500 transition-all group-hover:w-full"></span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/admin/jobs" className="hover:text-violet-400 transition-colors relative group">
+                    Jobs
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-violet-400 transition-all group-hover:w-full"></span>
+                  </Link>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <Link to="/" className="hover:text-red-500 transition-colors relative group">
+                    Home
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-red-500 transition-all group-hover:w-full"></span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/browse" className="hover:text-violet-400 transition-colors relative group">
+                    Browse
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-violet-400 transition-all group-hover:w-full"></span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/jobs" className="hover:text-violet-400 transition-colors relative group">
+                    Jobs
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-violet-400 transition-all group-hover:w-full"></span>
+                  </Link>
+                </li>
+              </>
+            )}
           </ul>
 
           <div className="flex items-center gap-4">
@@ -98,9 +122,10 @@ const Navbar = () => {
             ) : (
               <Popover>
                 <PopoverTrigger asChild>
+                  {/* Outer Avatar Container */}
                   <Avatar className="cursor-pointer border-2 border-violet-500/50 hover:border-red-500 transition-all">
-                    {/* Updated to use real user image data */}
-                    <AvatarImage src={user?.profile?.profilePhoto?.data} alt={user?.fullName} />
+                    {/* Ensure src is a direct URL string */}
+                    <AvatarImage src={profilePic} alt={user?.fullName} className="object-cover" />
                     <AvatarFallback className="bg-slate-800 text-white">
                       {initials}
                     </AvatarFallback>
@@ -110,7 +135,7 @@ const Navbar = () => {
                   <div className="bg-gradient-to-r from-violet-900/50 to-red-900/50 p-4 border-b border-white/10">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10 border border-white/20">
-                        <AvatarImage src={user?.profile?.profilePhoto?.data} />
+                        <AvatarImage src={profilePic} className="object-cover" />
                         <AvatarFallback className="bg-zinc-800 text-xs text-white">
                            {initials}
                         </AvatarFallback>

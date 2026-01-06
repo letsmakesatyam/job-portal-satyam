@@ -18,6 +18,12 @@ const JobDescription = () => {
     const user = { _id: "current_user_id" }; 
     const isApplied = job?.applications?.some(app => app.applicant === user?._id || app === user?._id) || false;
 
+    const formatSalaryLPA = (salary) => {
+        const value = Number(salary);
+        if (!value || isNaN(value)) return "—";
+        return `${(value / 100000).toFixed(1)} LPA`;
+      };
+
     useEffect(() => {
         const fetchJobDetail = async () => {
             try {
@@ -95,7 +101,7 @@ const JobDescription = () => {
                             <div className="flex flex-wrap gap-3">
                                 <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 px-3 py-1">{job.position} Positions</Badge>
                                 <Badge className="bg-red-500/10 text-red-400 border-red-500/20 px-3 py-1">{job.jobType}</Badge>
-                                <Badge className="bg-violet-500/10 text-violet-400 border-violet-500/20 px-3 py-1">{job.salary} LPA</Badge>
+                                <Badge className="bg-violet-500/10 text-violet-400 border-violet-500/20 px-3 py-1">{formatSalaryLPA(job.salary)}</Badge>
                             </div>
                         </div>
 

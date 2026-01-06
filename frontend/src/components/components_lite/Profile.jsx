@@ -9,15 +9,22 @@ import {
   Eye,
   X,
   Loader2,
-  Calendar,
   Building2,
-  MapPin
+  MapPin,
+  Calendar
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"; // Imported Table components
 import { toast } from "sonner";
 import { Worker, Viewer } from "@react-pdf-viewer/core";
 import "@react-pdf-viewer/core/lib/styles/index.css";
@@ -33,7 +40,6 @@ const Profile = () => {
   const [open, setOpen] = useState(false);
   const [isPhotoPreviewOpen, setIsPhotoPreviewOpen] = useState(false);
 
-  // ✅ NEW: applied jobs state
   const [appliedJobs, setAppliedJobs] = useState([]);
   const [jobsLoading, setJobsLoading] = useState(false);
 
@@ -43,7 +49,6 @@ const Profile = () => {
   const resumeUrl = user?.profile?.resume?.data || null;
   const profilePhotoUrl = user?.profile?.profilePhoto?.data || "";
 
-  // ✅ NEW: fetch applied jobs
   useEffect(() => {
     const fetchAppliedJobs = async () => {
       try {
@@ -56,7 +61,6 @@ const Profile = () => {
         if (!res.ok) throw new Error("Failed to fetch applied jobs");
 
         const data = await res.json();
-        console.log(data);
         setAppliedJobs(data.applications || []);
       } catch (error) {
         console.error(error);
@@ -139,7 +143,6 @@ const Profile = () => {
             </Button>
           </div>
 
-          {/* SKILLS */}
           <div className="mt-8 pt-8 border-t border-white/5">
             <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-4">
               Core Skills
@@ -162,40 +165,31 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* RESUME */}
           <div className="mt-6 flex flex-col gap-3">
             <Label className="text-sm font-bold uppercase tracking-widest text-gray-500">
               Resume
             </Label>
-
             {resumeUrl ? (
               <div className="flex flex-wrap gap-3">
                 <Button
                   onClick={() => setIsPreviewOpen(!isPreviewOpen)}
                   variant="outline"
-                  className="bg-zinc-800 border-white/10 gap-2 rounded-xl"
+                  className="bg-zinc-800 border-white/10 gap-2 rounded-xl text-white"
                 >
                   {isPreviewOpen ? <X className="w-4 h-4 text-red-500" /> : <Eye className="w-4 h-4 text-violet-400" />}
                   {isPreviewOpen ? "Close Preview" : "Preview"}
                 </Button>
-
                 <Button
                   onClick={downloadResume}
                   disabled={isDownloading}
-                  className="bg-gradient-to-r from-red-600 to-violet-600 gap-2 rounded-xl"
+                  className="bg-gradient-to-r from-red-600 to-violet-600 gap-2 rounded-xl text-white"
                 >
-                  {isDownloading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Download className="w-4 h-4" />
-                  )}
+                  {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                   {isDownloading ? "Downloading..." : "Download Resume"}
                 </Button>
               </div>
             ) : (
-              <span className="text-gray-500 italic text-sm">
-                Resume not uploaded
-              </span>
+              <span className="text-gray-500 italic text-sm">Resume not uploaded</span>
             )}
           </div>
 
@@ -210,91 +204,81 @@ const Profile = () => {
           )}
         </div>
 
-        {/* APPLIED JOBS SECTION */}
-       {/* APPLIED JOBS SECTION */}
-<div className="mt-12">
-  <div className="flex items-center justify-between mb-8">
-    <div className="flex items-center gap-3">
-      <div className="p-2 bg-red-500/10 rounded-lg">
-        <Briefcase className="w-6 h-6 text-red-500" />
-      </div>
-      <div>
-        <h2 className="text-2xl font-bold text-white">Applied Jobs</h2>
-        <p className="text-sm text-gray-500">Track your application progress</p>
-      </div>
-    </div>
-    <Badge variant="outline" className="border-white/10 text-gray-400 px-3 py-1">
-      {appliedJobs.length} Applications
-    </Badge>
-  </div>
-
-  {jobsLoading ? (
-    <div className="flex items-center justify-center py-20">
-       <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
-    </div>
-  ) : appliedJobs.length === 0 ? (
-    <div className="text-center py-20 border border-dashed border-white/10 rounded-3xl bg-zinc-900/20">
-      <p className="text-gray-500 italic">No jobs applied yet. Start your journey today!</p>
-    </div>
-  ) : (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-      {appliedJobs.map((job) => (
-        <Card
-          key={job._id}
-          className="group bg-zinc-900/40 border-white/5 hover:border-violet-500/40 transition-all duration-300 hover:shadow-2xl hover:shadow-violet-500/5 overflow-hidden"
-        >
-          <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3">
-            <div className="space-y-1.5">
-              {/* UPDATED JOB TITLE: Larger, bolder, and pure white */}
-              <CardTitle className="text-xl font-extrabold text-white tracking-tight group-hover:text-violet-400 transition-colors duration-300">
-                {job.job?.title}
-              </CardTitle>
-              <div className="flex items-center gap-2 text-zinc-400 text-sm font-medium">
-                 <Building2 className="w-4 h-4 text-violet-500/70" />
-                 <span>{job.job?.company?.name}</span>
+        {/* APPLIED JOBS TABLE SECTION */}
+        <div className="mt-12">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-red-500/10 rounded-lg">
+                <Briefcase className="w-6 h-6 text-red-500" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white">Applied Jobs</h2>
+                <p className="text-sm text-gray-500">Track your application progress</p>
               </div>
             </div>
-            <Badge
-              className={
-                job.status === "Selected"
-                  ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                  : job.status === "Rejected"
-                  ? "bg-red-500/10 text-red-500 border-red-500/20"
-                  : "bg-amber-500/10 text-amber-500 border-amber-500/20"
-              }
-            >
-              {job.status || "Pending"}
+            <Badge variant="outline" className="border-white/10 text-gray-400 px-3 py-1">
+              {appliedJobs.length} Applications
             </Badge>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-4 text-[11px] text-zinc-500 uppercase tracking-widest font-bold">
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5" />
-                  {new Date(job.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5" />
-                  {job.job?.location || "Remote"}
-                </div>
-              </div>
-              
-              {/* Visual Progress Line */}
-              <div className="relative w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                 <div 
-                   className={`h-full transition-all duration-700 ease-out ${
-                     job.status === "Selected" ? "w-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : 
-                     job.status === "Rejected" ? "w-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" : "w-1/3 bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
-                   }`} 
-                 />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  )}
-</div>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-zinc-900/30 overflow-hidden">
+            <Table>
+              <TableHeader className="bg-white/5">
+                <TableRow className="border-white/10 hover:bg-transparent">
+                  <TableHead className="text-gray-400">Date</TableHead>
+                  <TableHead className="text-gray-400">Job Role</TableHead>
+                  <TableHead className="text-gray-400">Company</TableHead>
+                  <TableHead className="text-right text-gray-400">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {jobsLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-10">
+                      <Loader2 className="w-6 h-6 animate-spin mx-auto text-violet-500" />
+                    </TableCell>
+                  </TableRow>
+                ) : appliedJobs.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-10 text-gray-500 italic">
+                      No jobs applied yet.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  appliedJobs.map((job) => (
+                    <TableRow key={job._id} className="border-white/10 hover:bg-white/5 transition-colors">
+                      <TableCell className="text-zinc-400 text-xs">
+                        {new Date(job.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="font-bold text-white">
+                        {job.job?.title}
+                      </TableCell>
+                      <TableCell className="text-zinc-300">
+                        <div className="flex items-center gap-2">
+                          <Building2 className="w-3.5 h-3.5 text-violet-500/70" />
+                          {job.job?.company?.name}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Badge
+                          className={
+                            job.status === "Selected"
+                              ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                              : job.status === "Rejected"
+                              ? "bg-red-500/10 text-red-500 border-red-500/20"
+                              : "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                          }
+                        >
+                          {job.status || "Pending"}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
       </div>
 
       {/* PHOTO PREVIEW */}
