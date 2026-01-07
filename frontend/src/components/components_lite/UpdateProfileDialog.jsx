@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, UserPlus, FileUp } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { USER_API_ENDPOINT } from "@/utils/data";
@@ -14,6 +14,9 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
   const [loading, setLoading] = useState(false);
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
+
+  // Helper to determine role
+  const isEmployer = user?.role === "employer";
 
   const [input, setInput] = useState({
     fullName: user?.fullName || "",
@@ -44,9 +47,13 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
     formData.append("email", input.email);
     formData.append("phoneNumber", input.phoneNumber);
     formData.append("bio", input.bio);
-    formData.append("skills", input.skills);
-    if (input.file) formData.append("profilePhoto", input.file);
-    if (input.resume) formData.append("resume", input.resume);
+
+    // Only append Seeker-specific fields if the user is not an employer
+    if (!isEmployer) {
+      formData.append("skills", input.skills);
+      if (input.file) formData.append("profilePhoto", input.file);
+      if (input.resume) formData.append("resume", input.resume);
+    }
 
     try {
       setLoading(true);
@@ -60,7 +67,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Update failed");
     } finally {
       setLoading(false);
       setOpen(false);
@@ -69,9 +76,14 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[425px] bg-[#0a0a0a] border-white/10 text-white" onInteractOutside={(e) => e.preventDefault()}>
+      <DialogContent 
+        className="sm:max-w-[425px] bg-[#0a0a0a] border-white/10 text-white" 
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-red-500 to-violet-500 bg-clip-text text-transparent">Update Profile</DialogTitle>
+          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-red-500 to-violet-500 bg-clip-text text-transparent">
+            Update Profile
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={submitHandler}>
           <div className="grid gap-4 py-4">
@@ -91,24 +103,34 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
               <Label htmlFor="bio" className="text-right">Bio</Label>
               <Input id="bio" name="bio" value={input.bio} onChange={changeEventHandler} className="col-span-3 bg-zinc-900 border-white/10" />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="skills" className="text-right">Skills</Label>
-              <Input id="skills" name="skills" placeholder="React, Node, CSS" value={input.skills} onChange={changeEventHandler} className="col-span-3 bg-zinc-900 border-white/10" />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Photo</Label>
-              <Input type="file" accept="image/*" onChange={fileEventHandler} className="col-span-3 bg-zinc-900 border-white/10" />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Resume</Label>
-              <Input type="file" accept="application/pdf" onChange={resumeEventHandler} className="col-span-3 bg-zinc-900 border-white/10" />
-            </div>
+
+            {/* CONDITIONAL FIELDS FOR STUDENTS/SEEKERS ONLY */}
+            {!isEmployer && (
+              <>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="skills" className="text-right">Skills</Label>
+                  <Input id="skills" name="skills" placeholder="React, Node, CSS" value={input.skills} onChange={changeEventHandler} className="col-span-3 bg-zinc-900 border-white/10" />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Photo</Label>
+                  <Input type="file" accept="image/*" onChange={fileEventHandler} className="col-span-3 bg-zinc-900 border-white/10" />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Resume</Label>
+                  <Input type="file" accept="application/pdf" onChange={resumeEventHandler} className="col-span-3 bg-zinc-900 border-white/10" />
+                </div>
+              </>
+            )}
           </div>
           <DialogFooter>
             {loading ? (
-              <Button className="w-full bg-violet-600"><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait</Button>
+              <Button className="w-full bg-violet-600">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait
+              </Button>
             ) : (
-              <Button type="submit" className="w-full bg-gradient-to-r from-red-600 to-violet-600 hover:opacity-90">Update Profile</Button>
+              <Button type="submit" className="w-full bg-gradient-to-r from-red-600 to-violet-600 hover:opacity-90">
+                Update Profile
+              </Button>
             )}
           </DialogFooter>
         </form>

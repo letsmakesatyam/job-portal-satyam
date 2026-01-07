@@ -1,4 +1,6 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import Navbar from './Navbar'
 import Header from './Header'
 import CategoryCarousel from './CategoryCarousel'
@@ -6,6 +8,16 @@ import LatestJob from './LatestJob'
 import Footer from './Footer'
 
 const Home = () => {
+  const { user } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // If the user is logged in and is an employer, redirect to companies page
+    if (user && user.role === 'employer') {
+      navigate("/admin/companies");
+    }
+  }, [user, navigate]);
+
   return (
     /* Updated styling: 
        - bg-black as base
