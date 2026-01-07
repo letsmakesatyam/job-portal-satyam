@@ -1,51 +1,108 @@
 import { Company } from "../models/company.model.js";
-export const registerCompany = async (req, res) => {
-  try {
-    const { name, email, description, website } = req.body;
+import cloudinary from "../utils/cloudinary.js";
 
-    // Basic validation
-    if (!name || !email) {
-      return res.status(400).json({
-        message: "Name and email are required",
-        success: false,
-      });
-    }
-
-    // Check if company model exists by email or name
-    const existingCompany = await Company.findOne({
-      $or: [{ email }, { name }]
+// Utility function for Cloudinary Upload
+const uploadToCloudinary = async (file, folder, resourceType = "image") => {
+    const b64 = Buffer.from(file.buffer).toString("base64");
+    let dataURI = "data:" + file.mimetype + ";base64," + b64;
+    const result = await cloudinary.uploader.upload(dataURI, {
+        folder,
+        resource_type: resourceType,
     });
-    if (existingCompany) {
-      return res.status(409).json({
-        message: `Company with this ${duplicateField} already exists`,
-        success: false,
-      });
-    }
-
-    const company = new Company({
-      name,
-      email,
-      description,
-      website,
-      userId: req._id
-    });
-
-    await company.save();
-
-    res.status(201).json({
-      message: "Company registered successfully",
-      company,
-      success: true,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: "Error registering company",
-      error: err.message,
-      success: false,
-    });
-  }
+    return result.secure_url;
 };
 
+export const registerCompany = async (req, res) => {
+    try {
+        const { name, email, description, website } = req.body;
+
+        if (!name || !email) {
+            return res.status(400).json({
+                message: "Name and email are required",
+                success: false,
+            });
+        }
+
+        const existingCompany = await Company.findOne({
+            $or: [{ email }, { name }]
+        });
+
+        if (existingCompany) {
+            return res.status(409).json({
+                message: `Company with this name or email already exists`,
+                success: false,
+            });
+        }
+
+        const company = new Company({
+            name,
+            email,
+            description,
+            website,
+            userId: req._id // Ensure your auth middleware sets req._id
+        });
+
+        await company.save();
+
+        res.status(201).json({
+            message: "Company registered successfully",
+            company,
+            success: true,
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: "Error registering company",
+            error: err.message,
+            success: false,
+        });
+    }
+};
+
+export const updateCompany = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, description, website, location } = req.body;
+        const file = req.file; // From multer
+
+        // 1. Prepare update object
+        const updateData = { name, description, website, location };
+
+        // 2. If a file is provided, upload it to Cloudinary
+        if (file) {
+            const logoUrl = await uploadToCloudinary(file, "company_logos");
+            updateData.logo = logoUrl;
+        }
+
+        // 3. Find and Update
+        const company = await Company.findOneAndUpdate(
+            { _id: id, userId: req._id },
+            { $set: updateData },
+            { new: true }
+        );
+
+        if (!company) {
+            return res.status(404).json({
+                message: "Company not found or unauthorized",
+                success: false,
+            });
+        }
+
+        res.status(200).json({
+            message: "Company updated successfully",
+            company,
+            success: true,
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            message: "Error updating company",
+            error: err.message,
+            success: false,
+        });
+    }
+};
+
+// ... keep your getAllCompanies and getCompanyById as they were
 
 export const getAllCompanies = async (req, res) => {
   try {
@@ -93,38 +150,3 @@ export const getCompanyById = async (req, res) => {
   }
 };
 
-export const updateCompany = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updateFields = req.body;
-
-    // Ensure the company belongs to the logged-in user
-    const company = await Company.findOne({ _id: id, userId: req._id });
-
-    if (!company) {
-      return res.status(404).json({
-        message: "Company not found",
-        success: false,
-      });
-    }
-
-    // Update only the fields that are present in req.body
-    Object.keys(updateFields).forEach((key) => {
-      company[key] = updateFields[key];
-    });
-
-    await company.save();
-
-    res.status(200).json({
-      message: "Company updated successfully",
-      company,
-      success: true,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: "Error updating company",
-      error: err.message,
-      success: false,
-    });
-  }
-};
