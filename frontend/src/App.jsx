@@ -15,6 +15,9 @@ import JobDescription from './components/components_lite/JobDescription'
 import Company from "./components/components_lite/Company"
 import CreateCompany from './components/components_lite/CreateCompany'
 import CompanySetup from './components/components_lite/CompanySetup'
+import AdminJobs from './components/components_lite/AdminJobs'
+import PostJob from './components/components_lite/PostJob'
+import JobApplicants from './components/components_lite/JobApplicants'
 const App = () => {
   checkUserLoggedIn();
   useGetAllJobs();
@@ -35,6 +38,9 @@ const App = () => {
             <Route path="/admin/companies" element={<Company/>}/>
             <Route path="/admin/companies/create" element={<CreateCompany/>}/>
             <Route path="/admin/companies/:id" element={<CompanySetup />} />
+            <Route path="/admin/jobs" element={<AdminJobs/>}/>
+            <Route path="/admin/jobs/create" element={<PostJob/>}/>
+            <Route path="/admin/jobs/:id/applicants" element={<JobApplicants />} />
 
         </Routes>
     </div>

@@ -61,7 +61,7 @@ const AdminJobs = () => {
       try {
         setLoading(true);
         const [jobsRes, companiesRes] = await Promise.all([
-          axios.get(`${JOB_API_ENDPOINT}/getadminjobs`, { withCredentials: true }),
+          axios.get(`${JOB_API_ENDPOINT}/admin`, { withCredentials: true }),
           axios.get(`${COMPANY_API_ENDPOINT}/get`, { withCredentials: true })
         ]);
 
@@ -71,6 +71,7 @@ const AdminJobs = () => {
         }
         if (companiesRes.data.success) {
           setCompanies(companiesRes.data.companies);
+          
         }
       } catch (error) {
         console.error(error);
