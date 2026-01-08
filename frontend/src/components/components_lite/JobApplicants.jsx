@@ -1,50 +1,93 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { ArrowLeft, Loader2, Mail, FileText, MoreVertical, ExternalLink } from "lucide-react";
+import { ArrowLeft, Loader2, Mail, Download, MoreVertical, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { APPLICATION_API_ENDPOINT, JOB_API_ENDPOINT } from "@/utils/data";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { 
+  Popover, 
+  PopoverContent, 
+  PopoverTrigger 
+} from "@/components/ui/popover";
 import { toast } from "sonner";
+
+const shortlistingStatus = ["Accepted", "Rejected"];
 
 const JobApplicants = () => {
   const params = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [applicants, setApplicants] = useState([]); // Array of applications
-  const [jobInfo, setJobInfo] = useState(null); // Separate state for job details
+  const [applicants, setApplicants] = useState([]); 
+  const [jobInfo, setJobInfo] = useState(null); 
+  const [isDownloading, setIsDownloading] = useState(null);
+
+  const getInitialData = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`${APPLICATION_API_ENDPOINT}/applicants/${params.id}`, {
+        withCredentials: true,
+      });
+      const jobRes = await axios.get(`${JOB_API_ENDPOINT}/get/${params.id}`, {
+        withCredentials: true,
+      });
+
+      if (res.data.success) {
+        setApplicants(res.data.applicants);
+      }
+      if (jobRes.data.success) {
+        setJobInfo(jobRes.data.job);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load applicants data");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const getInitialData = async () => {
-      try {
-        setLoading(true);
-        // 1. Fetch Applicants
-        const res = await axios.get(`${APPLICATION_API_ENDPOINT}/applicants/${params.id}`, {
-          withCredentials: true,
-        });
-
-        // 2. Fetch Job Details (to get title/type for the header)
-        const jobRes = await axios.get(`${JOB_API_ENDPOINT}/get/${params.id}`, {
-          withCredentials: true,
-        });
-
-        if (res.data.success) {
-          setApplicants(res.data.applicants);
-          console.log(res.data.applicants);
-        }
-        if (jobRes.data.success) {
-          setJobInfo(jobRes.data.job);
-        }
-      } catch (error) {
-        console.error(error);
-        toast.error("Failed to load applicants data");
-      } finally {
-        setLoading(false);
-      }
-    };
     getInitialData();
   }, [params.id]);
+
+  // Download Logic from Profile
+  const downloadResume = async (resumeUrl, originalName, applicantId) => {
+    if (!resumeUrl) return;
+    try {
+      setIsDownloading(applicantId);
+      const response = await fetch(resumeUrl);
+      const blob = await response.blob();
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute("download", originalName || "resume.pdf");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      toast.success("Download started");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to download resume");
+    } finally {
+      setIsDownloading(null);
+    }
+  };
+
+  // Status Update Logic
+  const statusHandler = async (status, id) => {
+    try {
+      const res = await axios.patch(`${APPLICATION_API_ENDPOINT}/status/${id}`, { status }, {
+        withCredentials: true
+      });
+      if (res.data.success) {
+        toast.success(res.data.message);
+        // Refresh data to show updated status
+        getInitialData();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update status");
+    }
+  };
 
   if (loading) {
     return (
@@ -100,7 +143,7 @@ const JobApplicants = () => {
                 <TableHead className="text-gray-300">Email</TableHead>
                 <TableHead className="text-gray-300">Resume</TableHead>
                 <TableHead className="text-gray-300">Applied Date</TableHead>
-                <TableHead className="text-gray-300 text-right">Status</TableHead>
+                <TableHead className="text-gray-300 text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -112,7 +155,16 @@ const JobApplicants = () => {
                         <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-violet-600 to-red-600 flex items-center justify-center text-sm font-bold uppercase">
                           {item.applicant?.fullName?.charAt(0) || "U"}
                         </div>
-                        <span className="text-white">{item.applicant?.fullName}</span>
+                        <div className="flex flex-col">
+                           <span className="text-white">{item.applicant?.fullName}</span>
+                           <Badge variant="outline" className={`w-fit text-[10px] h-4 mt-1 ${
+                                item.status === 'accepted' ? 'text-emerald-500 border-emerald-500/20' : 
+                                item.status === 'rejected' ? 'text-red-500 border-red-500/20' : 
+                                'text-blue-500 border-blue-500/20'
+                            }`}>
+                                {item.status || 'pending'}
+                            </Badge>
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell className="text-gray-400">
@@ -122,34 +174,52 @@ const JobApplicants = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-  {item.applicant?.profile?.resume ? (
-    <a 
-      href={item.applicant.profile.resume} 
-      target="_blank" 
-      rel="noopener noreferrer"
-      // This prevents the click from bubbling up to the TableRow
-      onClick={(e) => e.stopPropagation()} 
-      className="text-violet-400 hover:text-violet-300 flex items-center gap-1 transition-colors w-fit"
-    >
-      <FileText className="w-4 h-4" /> 
-      <span>View Resume</span> 
-      <ExternalLink className="w-3 h-3"/>
-    </a>
-  ) : (
-    <span className="text-gray-600 italic">No Resume</span>
-  )}
-</TableCell>
+                      {item.applicant?.profile?.resume ? (
+                        <button
+                          onClick={() => downloadResume(
+                            item.applicant.profile.resume.data || item.applicant.profile.resume, 
+                            item.applicant.profile.resumeOriginalName, 
+                            item._id
+                          )}
+                          disabled={isDownloading === item._id}
+                          className="text-violet-400 hover:text-violet-300 flex items-center gap-2 transition-colors w-fit disabled:opacity-50"
+                        >
+                          {isDownloading === item._id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Download className="w-4 h-4" />
+                          )}
+                          <span className="text-sm font-medium">Download</span>
+                        </button>
+                      ) : (
+                        <span className="text-gray-600 italic">No Resume</span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-gray-400 text-sm">
                       {new Date(item.createdAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Badge className={`${
-                        item.status === 'accepted' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
-                        item.status === 'rejected' ? 'bg-red-500/10 text-red-500 border-red-500/20' : 
-                        'bg-blue-500/10 text-blue-500 border-blue-500/20'
-                      } capitalize border`}>
-                        {item.status || 'pending'}
-                      </Badge>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-white/10">
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-40 bg-zinc-900 border-white/10 p-1 shadow-2xl">
+                          <div className="flex flex-col gap-1">
+                            {shortlistingStatus.map((status, index) => (
+                              <div
+                                key={index}
+                                onClick={() => statusHandler(status.toLowerCase(), item._id)}
+                                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer rounded-md transition-colors"
+                              >
+                                {status === "Accepted" ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <XCircle className="w-4 h-4 text-red-500" />}
+                                <span>{status}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                     </TableCell>
                   </TableRow>
                 ))

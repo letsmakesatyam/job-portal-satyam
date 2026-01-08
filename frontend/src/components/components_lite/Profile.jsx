@@ -48,8 +48,8 @@ const Profile = () => {
 
   const resumeUrl = user?.profile?.resume?.data || null;
   const profilePhotoUrl = user?.profile?.profilePhoto?.data || "";
+  
   useEffect(() => {
-    // UPDATED CONDITION: Only fetch if user exists AND is not an employer
     if (user && user?.role !== 'employer') {
         const fetchAppliedJobs = async () => {
           try {
@@ -65,7 +65,6 @@ const Profile = () => {
             setAppliedJobs(data.applications || []);
           } catch (error) {
             console.error(error);
-            // This won't trigger now during logout because of the 'user' check above
             toast.error("Unable to load applied jobs");
           } finally {
             setJobsLoading(false);
@@ -74,7 +73,7 @@ const Profile = () => {
     
         fetchAppliedJobs();
     }
-  }, [user]); // Use the whole user object or user?.role as dependency
+  }, [user]);
 
   const downloadResume = async () => {
     if (!resumeUrl) return;
@@ -276,9 +275,9 @@ const Profile = () => {
                         <TableCell className="text-right">
                           <Badge
                             className={
-                              job.status === "Selected"
+                              job.status?.toLowerCase() === "accepted" || job.status?.toLowerCase() === "selected"
                                 ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                                : job.status === "Rejected"
+                                : job.status?.toLowerCase() === "rejected"
                                 ? "bg-red-500/10 text-red-500 border-red-500/20"
                                 : "bg-amber-500/10 text-amber-500 border-amber-500/20"
                             }

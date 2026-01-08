@@ -118,17 +118,30 @@ export const getJobById = async (req, res) => {
 
 export const getAdminJobs = async (req, res) => {
     try {
-        const adminId = req._id; // assuming req.id contains the authenticated admin's user id
+        const adminId = req._id; // Logged-in admin/user ID
 
-        // Find jobs where created_by equals adminId
-        const jobs = await Job.find({ created_by: adminId });
+        // We find jobs created by this admin and populate the 'company' field 
+        // to get company name, logo, etc.
+        const jobs = await Job.find({ created_by: adminId })
+            .populate({
+                path: 'company',
+            })
+            .sort({ createdAt: -1 }); // Show newest jobs first
+
+        if (!jobs) {
+            return res.status(404).json({
+                message: "Jobs not found.",
+                success: false
+            })
+        };
 
         res.status(200).json({
-            message: "Only admin jobs fetched successfully",
+            message: "Admin jobs fetched successfully",
             jobs,
             success: true
         });
     } catch (err) {
+        console.error(err);
         res.status(500).json({
             message: "Failed to fetch admin jobs",
             error: err.message,
