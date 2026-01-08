@@ -7,6 +7,7 @@ import { MapPin, Briefcase, DollarSign, Zap, Building2 } from "lucide-react";
 
 const JobTemplate = ({ job }) => {
   const navigate = useNavigate(); // 2. Initialize navigate
+  console.log(job);
 
   const daysAgoFunction = (mongodbTime) => {
     const createdAt = new Date(mongodbTime);
@@ -27,8 +28,16 @@ const JobTemplate = ({ job }) => {
     <Card className="bg-zinc-950 border-zinc-800 hover:border-violet-500/50 transition-all duration-300 group overflow-hidden flex flex-col">
       <CardHeader className="relative pb-2">
         <div className="flex justify-between items-start">
-          <div className="p-3 bg-zinc-900 rounded-lg border border-zinc-800 group-hover:border-violet-500/30 transition-colors">
-            <Building2 className="w-6 h-6 text-violet-500" />
+          <div className="p-3 bg-zinc-900 rounded-lg border border-zinc-800 group-hover:border-violet-500/30 transition-colors overflow-hidden flex items-center justify-center w-12 h-12">
+            {job?.company?.logo ? (
+              <img 
+                src={job.company.logo} 
+                alt={`${job?.company?.name} logo`} 
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <Building2 className="w-6 h-6 text-violet-500" />
+            )}
           </div>
           <Badge className="bg-red-500/10 text-red-500 border-red-500/20">
             {job?.jobType}

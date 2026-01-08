@@ -10,6 +10,7 @@ import {
   getJobById,
  
   getAdminJobs,
+  updateJob,
 } from "../controllers/job.controller.js";
  
 // Create a job - authenticated
@@ -25,5 +26,10 @@ router.get("/get/:id", isAuthenticated, getJobById);
 
 // Get all jobs created by the authenticated admin
 router.get("/admin", isAuthenticated, getAdminJobs);
+// Add this import to your existing imports
+
+
+// Add this route
+router.put("/update/:id", isAuthenticated, updateJob);
 
 export default router;

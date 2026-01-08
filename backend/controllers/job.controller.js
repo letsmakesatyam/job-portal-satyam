@@ -72,9 +72,11 @@ export const getAllJobs = async (req, res) => {
             }
         }
 
+        // UPDATED: Added 'logo' to company population
         const jobs = await Job.find(filter)
-            .populate('company', 'name email')
-            .populate('created_by', 'name email');
+            .populate('company', 'name email logo') 
+            .populate('created_by', 'name email')
+            .sort({ createdAt: -1 }); // Optional: Show newest first
 
         res.status(200).json({
             message: "Jobs fetched successfully",
@@ -144,6 +146,34 @@ export const getAdminJobs = async (req, res) => {
         console.error(err);
         res.status(500).json({
             message: "Failed to fetch admin jobs",
+            error: err.message,
+            success: false
+        });
+    }
+};
+
+export const updateJob = async (req, res) => {
+    try {
+        const jobId = req.params.id;
+        const updates = req.body;
+
+        const job = await Job.findByIdAndUpdate(jobId, updates, { new: true, runValidators: true });
+
+        if (!job) {
+            return res.status(404).json({
+                message: "Job not found",
+                success: false
+            });
+        }
+
+        res.status(200).json({
+            message: "Job updated successfully",
+            job,
+            success: true
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: "Error updating job",
             error: err.message,
             success: false
         });
