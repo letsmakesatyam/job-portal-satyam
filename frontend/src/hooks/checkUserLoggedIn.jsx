@@ -7,6 +7,7 @@ import { setUser } from '../redux/authSlice.js'
 
 // Example logic for your hook
 const checkUserLoggedIn = () => {
+  const dispatch = useDispatch();
   useEffect(() => {
     const fetchUser = async () => {
       try {
