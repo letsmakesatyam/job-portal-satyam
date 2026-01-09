@@ -18,6 +18,7 @@ import CompanySetup from './components/components_lite/CompanySetup'
 import AdminJobs from './components/components_lite/AdminJobs'
 import PostJob from './components/components_lite/PostJob'
 import JobApplicants from './components/components_lite/JobApplicants'
+import ProtectedRoute from './components/components_lite/ProtectedRoute'
 const App = () => {
   checkUserLoggedIn();
   useGetAllJobs();
@@ -26,27 +27,50 @@ const App = () => {
     <div>
         <Navbar/>
         <Routes>
+            {/* --- Public Routes (Accessible to everyone) --- */}
+            <Route path="/" element={<Home/>}/>
             <Route path="/login" element={<Login/>}/>
             <Route path="/register" element={<Register/>}/>
-            <Route path="/" element={<Home/>}/>
             <Route path="/privacy" element={<PrivacyPolicy/>}/>
             <Route path="/terms" element={<TermsAndCondition/>}/>
-            <Route path="/jobs" element={<Jobs/>}/>
-            <Route path="/browse" element={<Browse/>}/>
-            <Route path="/profile" element={<Profile/>}/>
-            <Route path="/description/:id" element={<JobDescription />} />
-            <Route path="/admin/companies" element={<Company/>}/>
-            <Route path="/admin/companies/create" element={<CreateCompany/>}/>
-            <Route path="/admin/companies/:id" element={<CompanySetup />} />
-            <Route path="/admin/jobs" element={<AdminJobs/>}/>
-            <Route path="/admin/jobs/create" element={<PostJob/>}/>
-            <Route path="/admin/jobs/:id/applicants" element={<JobApplicants />} />
 
+            {/* --- Protected Student/User Routes --- */}
+            <Route path="/jobs" element={
+                <ProtectedRoute><Jobs/></ProtectedRoute>
+            }/>
+            <Route path="/browse" element={
+                <ProtectedRoute><Browse/></ProtectedRoute>
+            }/>
+            <Route path="/description/:id" element={
+                <ProtectedRoute><JobDescription /></ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+                <ProtectedRoute><Profile/></ProtectedRoute>
+            }/>
+
+            {/* --- Protected Admin Routes --- */}
+            <Route path="/admin/companies" element={
+                <ProtectedRoute><Company/></ProtectedRoute>
+            }/>
+            <Route path="/admin/companies/create" element={
+                <ProtectedRoute><CreateCompany/></ProtectedRoute>
+            }/>
+            <Route path="/admin/companies/:id" element={
+                <ProtectedRoute><CompanySetup /></ProtectedRoute>
+            } />
+            <Route path="/admin/jobs" element={
+                <ProtectedRoute><AdminJobs/></ProtectedRoute>
+            }/>
+            <Route path="/admin/jobs/create" element={
+                <ProtectedRoute><PostJob/></ProtectedRoute>
+            }/>
+            <Route path="/admin/jobs/:id/applicants" element={
+                <ProtectedRoute><JobApplicants /></ProtectedRoute>
+            } />
         </Routes>
     </div>
   )
 }
-
 export default App
 
 
