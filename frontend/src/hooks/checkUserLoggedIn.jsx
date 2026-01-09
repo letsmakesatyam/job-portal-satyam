@@ -5,19 +5,20 @@ import { useDispatch } from "react-redux";
 import { USER_API_ENDPOINT } from "../utils/data.js";
 import { setUser } from '../redux/authSlice.js'
 
-const checkUserLoggedIn = ()=>{
-    const dispatch= useDispatch();
-    useEffect(()=>{
-        const fetchUser = async ()=>{
-            const res = await axios.get(`${USER_API_ENDPOINT}/me`, {
-              withCredentials: true,
-            })
-            dispatch(setUser(res.data.user));
-            console.log(res.data.user)
-            
-          }
-          fetchUser();
-    },[])
-}
+// Example logic for your hook
+const checkUserLoggedIn = () => {
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        // Your API call here
+        const res = await axios.get('/api/me');
+        dispatch(setUser(res.data.user));
+      } catch (err) {
+        dispatch(setUser(null)); // This should set isLoading to false
+      }
+    };
+    fetchUser();
+  }, []);
+};
 
 export default checkUserLoggedIn;
