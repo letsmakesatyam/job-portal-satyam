@@ -11,3 +11,4 @@ const ProtectedRoute = ({ children }) => {
     if (isLoading) return <div>Loading...</div>; // Or a spinner
     return <>{user ? children : null}</>;
 };
+export default ProtectedRoute
