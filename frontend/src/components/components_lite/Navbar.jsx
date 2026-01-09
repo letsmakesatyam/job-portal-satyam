@@ -29,7 +29,7 @@ const Navbar = () => {
 
   // Ensure we are getting the correct string path for the photo
   // Check if your backend sends it as user.profile.profilePhoto or user.profilePhoto
-  const profilePic = user?.profile?.profilePhoto.data;
+  const profilePic = user?.profile?.profilePhoto?.data || "";
   console.log(profilePic)
 
   const handleLogout = async () => {
