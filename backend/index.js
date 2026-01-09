@@ -21,6 +21,20 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+const urlToReload = `https://job-portal-satyam-x06l.onrender.com`;
+const interval = 30000;
+
+function reloadWebsite() {
+  axios
+    .get(urlToReload)
+    .then((response) => {
+      console.log("website reloded");
+    })
+    .catch((error) => {
+      console.error(`Error : ${error.message}`);
+    });
+}
+
 
 //api 
 app.use("/api/users", useRouter);
