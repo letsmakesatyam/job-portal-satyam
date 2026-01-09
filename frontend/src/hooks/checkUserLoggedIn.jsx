@@ -12,7 +12,7 @@ const checkUserLoggedIn = () => {
     const fetchUser = async () => {
       try {
         // Your API call here
-        const res = await axios.get('/api/me');
+        const res = await axios.get('/api/me' , {withCredentials: true,});
         dispatch(setUser(res.data.user));
       } catch (err) {
         dispatch(setUser(null)); // This should set isLoading to false
