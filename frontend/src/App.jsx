@@ -28,7 +28,7 @@ const App = () => {
         <Navbar/>
         <Routes>
             {/* --- Public Routes (Accessible to everyone) --- */}
-            <Route path="/" element={<Home/>}/>
+            
             <Route path="/login" element={<Login/>}/>
             <Route path="/register" element={<Register/>}/>
             <Route path="/privacy" element={<PrivacyPolicy/>}/>
@@ -37,6 +37,9 @@ const App = () => {
             {/* --- Protected Student/User Routes --- */}
             <Route path="/jobs" element={
                 <ProtectedRoute><Jobs/></ProtectedRoute>
+            }/>
+            <Route path="/" element={
+                <ProtectedRoute><Home/></ProtectedRoute>
             }/>
             <Route path="/browse" element={
                 <ProtectedRoute><Browse/></ProtectedRoute>
