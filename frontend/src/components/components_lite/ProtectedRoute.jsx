@@ -1,5 +1,6 @@
 import { useSelector } from "react-redux";
-import { useNavigate, useEffect } from "react-router-dom";
+import { useNavigate} from "react-router-dom";
+import { useEffect } from "react";
 const ProtectedRoute = ({ children }) => {
     const { user, isLoading } = useSelector((store) => store.auth);
     const navigate = useNavigate();
