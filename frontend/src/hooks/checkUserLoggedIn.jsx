@@ -12,7 +12,7 @@ const checkUserLoggedIn = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`${USER_API_ENDPOINT}/api/users/me`, {
+        const res = await axios.get(`${USER_API_ENDPOINT}/me`, {
           withCredentials: true,
         });
         
