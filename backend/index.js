@@ -43,6 +43,8 @@ function reloadWebsite() {
     .then(() => console.log("Health check ping sent"))
     .catch((e) => console.error("Health check failed", e.message));
 }
+// Add this after your startServer() call or inside the startServer function
+setInterval(reloadWebsite, interval);
 
 
 const PORT=process.env.PORT || 5001;
