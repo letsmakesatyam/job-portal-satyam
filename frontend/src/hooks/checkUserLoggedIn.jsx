@@ -12,7 +12,7 @@ const checkUserLoggedIn = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get('https://job-portal-satyam-x06l.onrender.com/api/users/me', {
+        const res = await axios.get('https://job-portal-satyam.onrender.com/api/users/me', {
           withCredentials: true,
         });
         
