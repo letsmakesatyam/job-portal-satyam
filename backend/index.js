@@ -7,6 +7,7 @@ import useRouter from "./routes/user.routes.js";
 import useComponyRouter from "./routes/company.routes.js"
 import useJobRouter from './routes/job.routes.js'
 import ApplicationRouter from './routes/application.routes.js'
+import axios from "axios"
 const app = express();
 dotenv.config();
 
@@ -21,19 +22,7 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-const urlToReload = `https://job-portal-satyam.onrender.com/api/users`;
-const interval = 30000;
 
-function reloadWebsite() {
-  axios
-    .get(urlToReload)
-    .then((response) => {
-      console.log("website reloded");
-    })
-    .catch((error) => {
-      console.error(`Error : ${error.message}`);
-    });
-}
 
 
 //api 
@@ -41,6 +30,19 @@ app.use("/api/users", useRouter);
 app.use("/api/company", useComponyRouter)
 app.use("/api/job", useJobRouter)
 app.use("/api/application", ApplicationRouter);
+app.get("/health", (req, res) => {
+  res.status(200).send("Server is alive");
+});
+
+
+const urlToReload = `https://job-portal-satyam.onrender.com/health`;
+const interval = 30000;
+
+function reloadWebsite() {
+  axios.get(urlToReload)
+    .then(() => console.log("Health check ping sent"))
+    .catch((e) => console.error("Health check failed", e.message));
+}
 
 
 const PORT=process.env.PORT || 5001;
