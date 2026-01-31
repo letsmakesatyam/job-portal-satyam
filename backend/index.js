@@ -35,16 +35,7 @@ app.get("/health", (req, res) => {
 });
 
 
-const urlToReload = `https://job-portal-satyam.onrender.com/health`;
-const interval = 30000;
 
-function reloadWebsite() {
-  axios.get(urlToReload)
-    .then(() => console.log("Health check ping sent"))
-    .catch((e) => console.error("Health check failed", e.message));
-}
-// Add this after your startServer() call or inside the startServer function
-setInterval(reloadWebsite, interval);
 
 
 const PORT=process.env.PORT || 5001;
